@@ -1,0 +1,130 @@
+﻿@using BlazorInputFile
+@inject IJSRuntime jsRuntime
+@inject NotificationService NotificationService
+<div class="row">
+    <div class="col-12 p-0">
+        <div class="dropzone @dropClass rounded">
+            <BlazorInputFile.InputFile id="fileInput" multiple title=""
+                                       OnChange="HandleFileInputChange"
+                                       accept="@AcceptedFileTypes"
+                                       @ondragenter="HandleDragEnter"
+                                       @ondragleave="HandleDragLeave" />
+            @HelpText
+        </div>
+    </div>
+</div>
+
+@code {
+
+    [Parameter]
+    public string AcceptedFileTypes { get; set; }
+
+    [Parameter]
+    public string ErrorNotification { get; set; }
+
+    [Parameter]
+    public int? MaxFiles { get; set; }
+
+    [Parameter]
+    public string HelpText { get; set; }
+
+    [Parameter]
+    public EventCallback<List<IFileListEntry>> OnFileSelect { get; set; }
+
+    public DropZone()
+    {
+        if (AcceptedFileTypes is null)
+        {
+            AcceptedFileTypes = "*/*";
+        }
+
+        if (ErrorNotification is null)
+        {
+            ErrorNotification = string.Empty;
+        }
+
+        if (MaxFiles is null || MaxFiles < 1)
+        {
+            MaxFiles = 1;
+        }
+
+        if (HelpText is null)
+        {
+            HelpText = "Drag files here or click to upload.";
+        }
+    }
+
+    const int MaxFileSizeMB = 5;
+    const int MaxFileSize = MaxFileSizeMB * 1024 * 1024; // 5MB
+    private string dropClass = "";
+    private bool fileSizeError = false;
+    private bool fileTypeError = false;
+    private List<IFileListEntry> selectedFiles = new List<IFileListEntry>();
+    //HttpClient httpClient = new HttpClient();
+
+    private void HandleDragEnter()
+    {
+        dropClass = "dropzone-drag";
+    }
+
+    private void HandleDragLeave()
+    {
+        dropClass = "";
+    }
+
+    private async void HandleFileInputChange(IFileListEntry[] files)
+    {
+        if (files.Length > MaxFiles)
+        {
+            NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Error", Detail = "Max number of files surpassed" });
+            return;
+        }
+
+        dropClass = "";
+        fileSizeError = false;
+        fileTypeError = false;
+        List<string> acceptedFileTypes = AcceptedFileTypes.Split(',').ToList();
+        if (files != null)
+        {
+            foreach (var file in files)
+            {
+                bool error = false;
+                if (file.Size > MaxFileSize)
+                {
+                    error = true;
+                    fileSizeError = true;
+                }
+
+                if (!acceptedFileTypes.Contains(file.Type))
+                {
+                    error = true;
+                    fileTypeError = true;
+                }
+
+                //keep the good files
+                if (!error)
+                {
+                    selectedFiles.Add(file);
+                }
+                else
+                {
+                    NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Error", Detail = ErrorNotification });
+                }
+
+                if (selectedFiles.Count == MaxFiles) break;
+            }
+
+            if (selectedFiles.Count != 0)
+            {
+                await OnFileSelect.InvokeAsync(selectedFiles);
+            }
+
+            RemoveFiles();
+        }
+    }
+
+    private void RemoveFiles()
+    {
+        selectedFiles = new List<IFileListEntry>();
+    }
+}

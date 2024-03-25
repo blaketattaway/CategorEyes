@@ -1,0 +1,116 @@
+﻿@using BlazorInputFile;
+@using OneCore.CategorEyes.Client.Components
+@using System.Text.Json;
+@inject DialogService DialogService
+@inject NotificationService NotificationService
+@page "/"
+
+<div class="container">
+    <div class="row">
+        <div class="col-12 mb-4">
+            Use below section to upload your file and start the analysis.
+        </div>
+    </div>
+    <DropZone AcceptedFileTypes="@ACCEPTED_FILE_TYPES" ErrorNotification="@FILE_ERROR_NOTIFICATION" OnFileSelect="@SendToAnalyze" HelpText="@HELP_TEXT"/>
+</div>
+
+
+@code {
+    const string ACCEPTED_FILE_TYPES = "image/png,image/jpeg,application/pdf";
+    const string FILE_ERROR_NOTIFICATION = "File size should be less than 5MB and file extension should be png, jpg or pdf.";
+    const string PDF_FILE_TYPE = "application/pdf";
+    const string IMAGE_FILE_TYPE = "image";
+    const string HELP_TEXT = "Drag your file here or click to upload, only one file per upload is allowed.";
+
+    HttpClient httpClient = new HttpClient();
+
+    private async Task SendToAnalyze(List<IFileListEntry> files)
+    {
+        try
+        {
+            var file = files.FirstOrDefault();
+            var ms = await file.ReadAllAsync(5242880);
+            var fileBytes = ms.ToArray();
+            string base64 = Convert.ToBase64String(fileBytes);
+
+            var request = new AnalysisRequest
+                    {
+                        Base64File = base64,
+                        FileTypeName = file!.Type,
+                        FileType = GetFileType(file.Type)
+                    };
+
+            var analysisResponse = await new RestConsumer(BaseAPI.CategorEyes).PostResponse<AnalysisResponse, AnalysisRequest>("Analysis/Analyze", request);
+
+            switch (analysisResponse?.DocumentType)
+            {
+                case DocumentType.Invoice:
+                    var invoiceData = JsonSerializer.Deserialize<Invoice>(analysisResponse.Data);
+                    await ShowInvoiceDialog(invoiceData, analysisResponse.AdditionalData);
+                    break;
+                case DocumentType.GeneralText:
+                    var generalTextData = JsonSerializer.Deserialize<GeneralText>(analysisResponse.Data);
+                    await ShowGeneralDataDialog(generalTextData, analysisResponse.AdditionalData);
+                    break;
+            }
+        }
+        catch (Exception ex)
+        {
+            var wea = ex.Message;
+            NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Error", Detail = "An Error Ocurred" });
+        }
+    }
+
+    private FileType GetFileType(string fileType)
+    {
+        if (fileType == PDF_FILE_TYPE)
+        {
+            return FileType.Pdf;
+        }
+        else if (fileType.Contains(IMAGE_FILE_TYPE))
+        {
+            return FileType.Image;
+        }
+        return FileType.Unknown;
+    }
+
+    async Task ShowGeneralDataDialog(GeneralText? generalText, string additionalData)
+    {
+        await DialogService.OpenAsync("General Data", ds =>
+    @<div>
+        Description: @(generalText?.Description ?? string.Empty)<br />
+        Summary: @(generalText?.Summary ?? string.Empty)<br />
+        Sentiment: @(generalText?.Sentiment ?? string.Empty) <br />
+    </div>, new DialogOptions()
+          {
+              CssClass = "custom-dialog-class",
+              WrapperCssClass = "custom-dialog-wrapper-class"
+          });
+    }
+
+    async Task ShowInvoiceDialog(Invoice? invoice, string additionalData)
+    {
+        await DialogService.OpenAsync("General Data", ds =>
+    @<div>
+        Cliente: @(invoice?.ClientInfo ?? string.Empty)<br />
+        Proveedor: @(invoice?.ProviderInfo ?? string.Empty)<br />
+        Fecha: @(invoice?.Date ?? string.Empty) <br />
+        Productos: <br />
+        @foreach (var product in invoice?.Products ?? new List<Product>())
+        {
+            <div>
+                Nombre: @(product.ProductName ?? string.Empty) <br />
+                Cantidad: @(product.Quantity.ToString() ?? string.Empty) <br />
+                Precio: @(product.UnitPrice.ToString() ?? string.Empty) <br />
+                Total: @(product.Total.ToString() ?? string.Empty) <br />
+            </div>
+        }
+        Total: @(invoice?.Total.ToString() ?? string.Empty) <br />
+        AdditionalData: @(additionalData ?? string.Empty)
+    </div>, new DialogOptions()
+          {
+              CssClass = "custom-dialog-class",
+              WrapperCssClass = "custom-dialog-wrapper-class"
+          });
+    }
+}
