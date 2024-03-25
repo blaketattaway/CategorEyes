@@ -1,2 +1,19 @@
 ﻿@page "/historical"
 
+@code {
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetPagedLogs(1, 10, null);
+    }
+
+    private async Task GetPagedLogs(int page, int pageSize, string? filter)
+    {
+        var logsResponse = await new RestConsumer(BaseAPI.CategorEyes).PostResponse<LogResponse, LogRequest>(Endpoints.GET_LOGS, new LogRequest
+        {
+            Page = page,
+            PageSize = pageSize,
+            Filter = filter
+        });
+    }
+}

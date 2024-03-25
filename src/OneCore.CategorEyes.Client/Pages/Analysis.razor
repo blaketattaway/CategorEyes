@@ -16,20 +16,19 @@
 
 
 @code {
+    const int MAX_FILE_SIZE = 5242880;
     const string ACCEPTED_FILE_TYPES = "image/png,image/jpeg,application/pdf";
     const string FILE_ERROR_NOTIFICATION = "File size should be less than 5MB and file extension should be png, jpg or pdf.";
     const string PDF_FILE_TYPE = "application/pdf";
     const string IMAGE_FILE_TYPE = "image";
     const string HELP_TEXT = "Drag your file here or click to upload, only one file per upload is allowed.";
 
-    HttpClient httpClient = new HttpClient();
-
     private async Task SendToAnalyze(List<IFileListEntry> files)
     {
         try
         {
             var file = files.FirstOrDefault();
-            var ms = await file.ReadAllAsync(5242880);
+            var ms = await file.ReadAllAsync(MAX_FILE_SIZE);
             var fileBytes = ms.ToArray();
             string base64 = Convert.ToBase64String(fileBytes);
 
@@ -40,7 +39,7 @@
                         FileType = GetFileType(file.Type)
                     };
 
-            var analysisResponse = await new RestConsumer(BaseAPI.CategorEyes).PostResponse<AnalysisResponse, AnalysisRequest>("Analysis/Analyze", request);
+            var analysisResponse = await new RestConsumer(BaseAPI.CategorEyes).PostResponse<AnalysisResponse, AnalysisRequest>(Endpoints.ANALYSIS, request);
 
             switch (analysisResponse?.DocumentType)
             {
@@ -54,9 +53,8 @@
                     break;
             }
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            var wea = ex.Message;
             NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Error", Detail = "An Error Ocurred" });
         }
     }
