@@ -67,61 +67,6 @@ namespace OneCore.CategorEyes.Business.Analysis
             return response;
         }
 
-        private object CreateOpenAIRequest(AnalysisRequest request)
-        {
-            List<object> content = new List<object>();
-
-            switch (request.FileType)
-            {
-                case FileType.Pdf:
-                    content = new List<object>
-                    {
-                        new
-                        {
-                            type = MessageContentType.TEXT,
-                            text = AIInstructions.INSTRUCTIONS.Replace(TEXT_TO_REPLACE, ReplacingLines.PDF_REPLACELINE)
-                        },
-                        new
-                        {
-                            type = MessageContentType.TEXT,
-                            text = ReadPdf(request.Base64File)
-                        }
-                    };
-                    break;
-                case FileType.Image:
-                    content = new List<object>
-                    {
-                        new
-                        {
-                            type = MessageContentType.TEXT,
-                            text = AIInstructions.INSTRUCTIONS.Replace(TEXT_TO_REPLACE, ReplacingLines.IMAGE_REPLACELINE)
-                        },
-                        new
-                        {
-                            type = MessageContentType.IMAGE_URL,
-                            image_url = $"{ DATA }{ request.FileTypeName }{ BASE64 }{ request.Base64File }"
-                        }
-                    };
-                    break;
-                default:
-                    throw new ArgumentException("Unknown file type");
-            }
-
-            return new
-            {
-                model = OpenAIModels.GPT4_VISION_PREVIEW,
-                messages = new List<object>
-                        {
-                            new
-                            {
-                                role = Roles.USER,
-                                content = content
-                            }
-                        },
-                max_tokens = 1000
-            };
-        }
-
         private static string ReadPdf(string base64String)
         {
             byte[] pdfBytes = Convert.FromBase64String(base64String);
@@ -146,5 +91,47 @@ namespace OneCore.CategorEyes.Business.Analysis
 
         private static string RemoveInvalidChars(string json)
             => json.Replace(JSON_START, string.Empty).Replace(JSON_END, string.Empty);
+
+        private object CreateOpenAIRequest(AnalysisRequest request)
+        {
+            return request.FileType switch
+            {
+                FileType.Pdf => CreatePdfRequest(request),
+                FileType.Image => CreateImageRequest(request),
+                _ => throw new ArgumentException("Unknown file type"),
+            };
+        }
+
+        private object CreatePdfRequest(AnalysisRequest request)
+        {
+            var content = new List<object>
+        {
+            new { type = MessageContentType.TEXT, text = AIInstructions.INSTRUCTIONS.Replace(TEXT_TO_REPLACE, ReplacingLines.PDF_REPLACELINE) },
+            new { type = MessageContentType.TEXT, text = ReadPdf(request.Base64File) }
+        };
+
+            return CreateBaseRequest(content);
+        }
+
+        private object CreateImageRequest(AnalysisRequest request)
+        {
+            var content = new List<object>
+        {
+            new { type = MessageContentType.TEXT, text = AIInstructions.INSTRUCTIONS.Replace(TEXT_TO_REPLACE, ReplacingLines.IMAGE_REPLACELINE) },
+            new { type = MessageContentType.IMAGE_URL, image_url = $"{ DATA }{ request.FileTypeName }{ BASE64 }{ request.Base64File }" }
+        };
+
+            return CreateBaseRequest(content);
+        }
+
+        private object CreateBaseRequest(List<object> content)
+        {
+            return new
+            {
+                model = OpenAIModels.GPT4_VISION_PREVIEW,
+                messages = new List<object> { new { role = Roles.USER, content = content } },
+                max_tokens = 1000
+            };
+        }
     }
 }
