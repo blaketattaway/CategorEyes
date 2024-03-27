@@ -21,7 +21,7 @@ namespace OneCore.CategorEyes.Infrastructure
     {
         public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
         {
-            services.AddDbContext<CategorEyesDbContext>();
+            services.AddDbContext<CategorEyesDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("CategorEyes")));
             services.AddBusiness();
             services.AddScoped<IOpenAIService, OpenAIService>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
