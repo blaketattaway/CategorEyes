@@ -25,11 +25,11 @@ namespace OneCore.CategorEyes.Client.Models
 
         public enum HistoricalType
         {
-            [Display(Name = "Document Upload")]
+            [Display(Description = "Document Upload")]
             DocumentUpload = 1,
-            [Display(Name = "IA")]
+            [Display(Description = "IA")]
             IA = 2,
-            [Display(Name = "User Interaction")]
+            [Display(Description = "User Interaction")]
             UserInteraction = 3,
         }
 

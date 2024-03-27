@@ -24,8 +24,8 @@ namespace OneCore.CategorEyes.Business.Log
         public async Task<LogResponse> GetPaged(LogRequest request)
         {
             (IReadOnlyList<Historical> historicals, int totalPages) = !string.IsNullOrEmpty(request.Filter?.Trim()) && request.Filter.Length >= MIN_FILTER_LENGTH ?
-                await _unitOfWork.HistoricalRepository.GetPagedAsync(request.Skip, request.Take, x => x.Description.Contains(request.Filter!)) :
-                await _unitOfWork.HistoricalRepository.GetPagedAsync(request.Skip, request.Take);
+                await _unitOfWork.HistoricalRepository.GetPagedAsync(request.Skip, request.Take, x => x.Description.Contains(request.Filter!), request.Sort) :
+                await _unitOfWork.HistoricalRepository.GetPagedAsync(request.Skip, request.Take, sortDescriptor: request.Sort);
 
             return new LogResponse
             {

@@ -9,6 +9,5 @@ namespace OneCore.CategorEyes.Business.Persistence.Repositories
 {
     public interface IHistoricalRepository : IAsyncRepository<Historical>
     {
-        Task<List<Historical>> GetByFilter();
     }
 }

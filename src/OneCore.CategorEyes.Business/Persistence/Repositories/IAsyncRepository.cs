@@ -1,4 +1,5 @@
 ﻿using OneCore.CategorEyes.Commons.Entities.Common;
+using OneCore.CategorEyes.Commons.Requests;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,6 +16,7 @@ namespace OneCore.CategorEyes.Business.Persistence.Repositories
         Task<IReadOnlyList<T>> GetAsync(Expression<Func<T, bool>> predicate);
 
         Task<(IReadOnlyList<T>, int)> GetPagedAsync(int skip, int top, Expression<Func<T, bool>>? predicate = null,
+            SortDescriptor? sortDescriptor = null,
             bool disableTracking = true);
 
         Task<T?> GetByIdAsync(long id);

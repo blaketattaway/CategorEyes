@@ -7,10 +7,10 @@
 <RadzenDataGrid @ref="grid" SelectionMode="DataGridSelectionMode.Multiple" KeyProperty="Id" IsLoading="@isLoading" Count="@count" Data="@historicals"
                 LoadData="@LoadData" FilterPopupRenderMode="PopupRenderMode.OnDemand" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
                 FilterMode="FilterMode.Advanced" AllowSorting="true" AllowFiltering="true" AllowPaging="true" PageSize="10"
-                PagerHorizontalAlign="HorizontalAlign.Center" TItem="Models.Historical" ColumnWidth="200px">
+                PagerHorizontalAlign="HorizontalAlign.Center" TItem="Models.Historical" ColumnWidth="200px" LogicalFilterOperator="LogicalFilterOperator.And" GotoFirstPageOnSort="true">
     <Columns>
-        <RadzenDataGridColumn TItem="Models.Historical" Property="Id" Filterable="false" Title="ID" Frozen="true" Width="50px" TextAlign="TextAlign.Center" />
-        <RadzenDataGridColumn TItem="Models.Historical" Property="HistoricalTypeName" Title="Type" Frozen="true" Width="50px" TextAlign="TextAlign.Center" />
+        <RadzenDataGridColumn TItem="Models.Historical" Property="Id" Filterable="false" Title="ID" Frozen="true" Width="50px" TextAlign="TextAlign.Center" SortOrder="SortOrder.Ascending" />
+        <RadzenDataGridColumn TItem="Models.Historical" Property="HistoricalTypeEnum" Title="Type" Frozen="true" Width="50px" TextAlign="TextAlign.Center" />
         <RadzenDataGridColumn TItem="Models.Historical" Property="CreationDate" Title="Date of Creation" Frozen="true" Width="50px" TextAlign="TextAlign.Center" />
         <RadzenDataGridColumn TItem="Models.Historical" Property="Description" Title="Description" Frozen="true" Width="50px" TextAlign="TextAlign.Center" />
     </Columns>
@@ -28,6 +28,8 @@
     string? lastFilter;
     const int SKIP = 0;
     const int TAKE = 10;
+    const string HISTORICAL_TYPE_PROP_NAME = "HistoricalType";
+    const string HISTORICAL_TYPE_ENUM_PROP_NAME = "HistoricalTypeEnum";
 
     async Task LoadData(LoadDataArgs loadDataArgs)
     {
@@ -39,11 +41,12 @@
                 {
                     Skip = loadDataArgs.Skip ?? SKIP,
                     Take = loadDataArgs.Top ?? TAKE,
+                    Sort = GetSort(loadDataArgs)
                 });
 
             logsResponse.Historicals.ForEach(h =>
             {
-                h.HistoricalTypeName = ((HistoricalType)h.HistoricalType).GetAttribute<DisplayAttribute>()?.Name ?? string.Empty;
+                h.HistoricalTypeEnum = (HistoricalType)h.HistoricalType;
             });
 
             historicals = logsResponse.Historicals.AsODataEnumerable<Models.Historical>();
@@ -62,6 +65,19 @@
         await LoadData(new LoadDataArgs());
         grid.Reset(true);
         await grid.FirstPage(true);
+    }
+
+    private SortDescriptor? GetSort(LoadDataArgs loadDataArgs)
+    {
+        var sort = loadDataArgs.Sorts.FirstOrDefault();
+
+        if (sort is null) return null;
+
+        return new SortDescriptor
+        {
+            Property = sort.Property.Equals(HISTORICAL_TYPE_ENUM_PROP_NAME) ? HISTORICAL_TYPE_PROP_NAME : sort.Property,
+            SortOrder = sort.SortOrder
+        };
     }
 
     private async Task ExporToExcel()

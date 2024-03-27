@@ -8,6 +8,6 @@ namespace OneCore.CategorEyes.Client.Models
         public byte HistoricalType { get; set; }
         public string Description { get; set; }
         public DateTime CreationDate { get; set; }
-        public string HistoricalTypeName { get; set; }
+        public HistoricalType HistoricalTypeEnum { get; set; }
     }
 }

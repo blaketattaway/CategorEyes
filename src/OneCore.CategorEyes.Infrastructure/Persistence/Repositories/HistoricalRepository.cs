@@ -15,10 +15,5 @@ namespace OneCore.CategorEyes.Infrastructure.Persistence.Repositories
         public HistoricalRepository(CategorEyesDbContext context) : base(context)
         {
         }
-
-        public Task<List<Historical>> GetByFilter()
-        {
-            throw new NotImplementedException();
-        }
     }
 }
