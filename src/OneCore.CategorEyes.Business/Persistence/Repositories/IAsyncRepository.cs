@@ -11,20 +11,10 @@ namespace OneCore.CategorEyes.Business.Persistence.Repositories
 {
     public interface IAsyncRepository<T> where T : BaseEntity
     {
-        Task<IReadOnlyList<T>> GetAllAsync();
-
-        Task<IReadOnlyList<T>> GetAsync(Expression<Func<T, bool>> predicate);
-
-        Task<(IReadOnlyList<T>, int)> GetPagedAsync(int skip, int top, Expression<Func<T, bool>>? predicate = null,
+        Task<(IReadOnlyList<T>, int)> GetPagedAsync(int skip, int take, Expression<Func<T, bool>>? predicate = null,
             SortDescriptor? sortDescriptor = null,
             bool disableTracking = true);
 
-        Task<T?> GetByIdAsync(long id);
-
         Task AddAsync(T entity);
-
-        void UpdateEntity(T entity);
-
-        void DeleteEntity(T entity);
     }
 }

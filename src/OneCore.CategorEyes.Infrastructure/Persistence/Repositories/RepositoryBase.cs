@@ -29,21 +29,6 @@ namespace OneCore.CategorEyes.Infrastructure.Persistence.Repositories
             await _dbContext.Set<T>().AddAsync(entity);
         }
 
-        public void DeleteEntity(T entity)
-        {
-            _dbContext.Set<T>().Remove(entity);
-        }
-
-        public async Task<IReadOnlyList<T>> GetAllAsync()
-        {
-            return await _dbContext.Set<T>().ToListAsync();
-        }
-
-        public async Task<IReadOnlyList<T>> GetAsync(Expression<Func<T, bool>> predicate)
-        {
-            return await _dbContext.Set<T>().Where(predicate).ToListAsync();
-        }
-
         public async Task<(IReadOnlyList<T>, int)> GetPagedAsync(int skip, int take, 
             Expression<Func<T, bool>>? predicate = null,
             SortDescriptor? sortDescriptor = null,
@@ -74,17 +59,6 @@ namespace OneCore.CategorEyes.Infrastructure.Persistence.Repositories
             }
 
             return (await query.Skip(skip).Take(take).ToListAsync(), await query.CountAsync());
-        }
-
-        public async Task<T?> GetByIdAsync(long id)
-        {
-            return await _dbContext.Set<T>().FindAsync(id);
-        }
-
-        public void UpdateEntity(T entity)
-        {
-            _dbContext.Set<T>().Attach(entity);
-            _dbContext.Entry(entity).State = EntityState.Modified;
         }
     }
 }
