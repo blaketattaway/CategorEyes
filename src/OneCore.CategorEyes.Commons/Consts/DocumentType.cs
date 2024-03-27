@@ -9,6 +9,7 @@ namespace OneCore.CategorEyes.Commons.Consts
     public enum DocumentType
     {
         Invoice,
-        GeneralText
+        GeneralText,
+        Other
     }
 }

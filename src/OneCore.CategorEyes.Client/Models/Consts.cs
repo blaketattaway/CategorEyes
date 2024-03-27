@@ -1,4 +1,6 @@
-﻿namespace OneCore.CategorEyes.Client.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace OneCore.CategorEyes.Client.Models
 {
     public class Consts
     {
@@ -17,7 +19,18 @@
         public enum DocumentType
         {
             Invoice,
-            GeneralText
+            GeneralText,
+            Other
+        }
+
+        public enum HistoricalType
+        {
+            [Display(Name = "Document Upload")]
+            DocumentUpload = 1,
+            [Display(Name = "IA")]
+            IA = 2,
+            [Display(Name = "User Interaction")]
+            UserInteraction = 3,
         }
 
         public static class URLs

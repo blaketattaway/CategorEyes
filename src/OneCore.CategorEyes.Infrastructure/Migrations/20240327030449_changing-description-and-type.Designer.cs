@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using OneCore.CategorEyes.Infrastructure.Persistence.Context;
 
@@ -11,9 +12,10 @@ using OneCore.CategorEyes.Infrastructure.Persistence.Context;
 namespace OneCore.CategorEyes.Infrastructure.Migrations
 {
     [DbContext(typeof(CategorEyesDbContext))]
-    partial class CategorEyesDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240327030449_changing-description-and-type")]
+    partial class changingdescriptionandtype
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

@@ -14,7 +14,7 @@ namespace OneCore.CategorEyes.Business.Persistence.Repositories
 
         Task<IReadOnlyList<T>> GetAsync(Expression<Func<T, bool>> predicate);
 
-        Task<(IReadOnlyList<T>, int)> GetPagedAsync(int page, int pageSize, Expression<Func<T, bool>>? predicate = null,
+        Task<(IReadOnlyList<T>, int)> GetPagedAsync(int skip, int top, Expression<Func<T, bool>>? predicate = null,
             bool disableTracking = true);
 
         Task<T?> GetByIdAsync(long id);

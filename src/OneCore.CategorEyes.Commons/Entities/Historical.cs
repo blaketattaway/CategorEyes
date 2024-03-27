@@ -9,7 +9,7 @@ namespace OneCore.CategorEyes.Commons.Entities
 {
     public class Historical : BaseEntity
     {
-        public short HistoricalType { get; set; }
-        public string Data { get; set; }
+        public byte HistoricalType { get; set; }
+        public string Description { get; set; }
     }
 }

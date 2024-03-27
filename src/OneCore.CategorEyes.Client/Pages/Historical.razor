@@ -1,19 +1,71 @@
-﻿@page "/historical"
+﻿@using System.ComponentModel.DataAnnotations;
+@inject NotificationService NotificationService
+@page "/historical"
+
+<RadzenButton Text="Reset" Click="@Reset" Style="margin-bottom: 20px;" />
+<RadzenButton Text="Export" Click="@ExporToExcel" Style="margin-bottom: 20px; float: right" Icon="description" ButtonStyle="ButtonStyle.Success" />
+<RadzenDataGrid @ref="grid" SelectionMode="DataGridSelectionMode.Multiple" KeyProperty="Id" IsLoading="@isLoading" Count="@count" Data="@historicals"
+                LoadData="@LoadData" FilterPopupRenderMode="PopupRenderMode.OnDemand" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                FilterMode="FilterMode.Advanced" AllowSorting="true" AllowFiltering="true" AllowPaging="true" PageSize="10"
+                PagerHorizontalAlign="HorizontalAlign.Center" TItem="Models.Historical" ColumnWidth="200px">
+    <Columns>
+        <RadzenDataGridColumn TItem="Models.Historical" Property="Id" Filterable="false" Title="ID" Frozen="true" Width="50px" TextAlign="TextAlign.Center" />
+        <RadzenDataGridColumn TItem="Models.Historical" Property="HistoricalTypeName" Title="Type" Frozen="true" Width="50px" TextAlign="TextAlign.Center" />
+        <RadzenDataGridColumn TItem="Models.Historical" Property="CreationDate" Title="Date of Creation" Frozen="true" Width="50px" TextAlign="TextAlign.Center" />
+        <RadzenDataGridColumn TItem="Models.Historical" Property="Description" Title="Description" Frozen="true" Width="50px" TextAlign="TextAlign.Center" />
+    </Columns>
+    <LoadingTemplate>
+        <RadzenProgressBarCircular ProgressBarStyle="ProgressBarStyle.Primary" Value="100" ShowValue="false" Mode="ProgressBarMode.Indeterminate" />
+    </LoadingTemplate>
+</RadzenDataGrid>
+
 
 @code {
+    bool isLoading;
+    int count;
+    ODataEnumerable<Models.Historical> historicals;
+    RadzenDataGrid<Models.Historical> grid;
+    string? lastFilter;
+    const int SKIP = 0;
+    const int TAKE = 10;
 
-    protected override async Task OnInitializedAsync()
+    async Task LoadData(LoadDataArgs loadDataArgs)
     {
-        await GetPagedLogs(1, 10, null);
+        isLoading = true;
+
+        try
+        {
+            var logsResponse = await new RestConsumer(BaseAPI.CategorEyes).PostResponse<LogResponse, LogRequest>(Endpoints.GET_LOGS, new LogRequest
+                {
+                    Skip = loadDataArgs.Skip ?? SKIP,
+                    Take = loadDataArgs.Top ?? TAKE,
+                });
+
+            logsResponse.Historicals.ForEach(h =>
+            {
+                h.HistoricalTypeName = ((HistoricalType)h.HistoricalType).GetAttribute<DisplayAttribute>()?.Name ?? string.Empty;
+            });
+
+            historicals = logsResponse.Historicals.AsODataEnumerable<Models.Historical>();
+            count = logsResponse.TotalPages;
+        }
+        catch (Exception)
+        {
+            NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Error", Detail = "An Error Ocurred" });
+        }
+
+        isLoading = false;
     }
 
-    private async Task GetPagedLogs(int page, int pageSize, string? filter)
+    private async Task Reset()
     {
-        var logsResponse = await new RestConsumer(BaseAPI.CategorEyes).PostResponse<LogResponse, LogRequest>(Endpoints.GET_LOGS, new LogRequest
-        {
-            Page = page,
-            PageSize = pageSize,
-            Filter = filter
-        });
+        await LoadData(new LoadDataArgs());
+        grid.Reset(true);
+        await grid.FirstPage(true);
+    }
+
+    private async Task ExporToExcel()
+    {
+        
     }
 }

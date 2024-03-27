@@ -34,7 +34,7 @@ namespace OneCore.CategorEyes.Commons.Consts
         {
             public const string INSTRUCTIONS = @"
             Con base en la información de #{replaceLine} devuélveme un json con lo siguientes campos:
-            'DocumentTypeName', en él pondrás 'Invoice' si es una factura o 'GeneralText' si es un texto en general. 
+            'DocumentTypeName', en él pondrás 'Invoice' si es una factura o 'GeneralText' si es un texto en general. En caso que no sea ninguno de los ateriores pondrás 'Other' e ignorarás el resto de los campos.
             Luego quiero que me llenes un nuevo atributo que se llame 'Data' el cuál debe ser una cadena JSON que luego pueda parsear a un objeto json con los siguientes campos.
             En caso de que haya sido factura: 
             1. ClientInfo en este pondrás el nombre y dirección del cliente.

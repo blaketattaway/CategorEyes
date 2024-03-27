@@ -1,10 +1,13 @@
-﻿namespace OneCore.CategorEyes.Client.Models
+﻿using static OneCore.CategorEyes.Client.Models.Consts;
+
+namespace OneCore.CategorEyes.Client.Models
 {
     public class Historical
     {
-        public long HistoricalId { get; set; }
-        public byte LogType { get; set; }
+        public long Id { get; set; }
+        public byte HistoricalType { get; set; }
         public string Description { get; set; }
-        public DateTime Date { get; set; }
+        public DateTime CreationDate { get; set; }
+        public string HistoricalTypeName { get; set; }
     }
 }

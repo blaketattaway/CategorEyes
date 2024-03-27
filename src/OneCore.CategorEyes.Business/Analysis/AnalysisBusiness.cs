@@ -1,5 +1,4 @@
-﻿using itext.pdfimage.Extensions;
-using iText.Kernel.Pdf;
+﻿using iText.Kernel.Pdf;
 using iText.Kernel.Pdf.Canvas.Parser;
 using iText.Kernel.Pdf.Canvas.Parser.Listener;
 using OneCore.CategorEyes.Business.Persistence;
@@ -8,11 +7,6 @@ using OneCore.CategorEyes.Commons.Consts;
 using OneCore.CategorEyes.Commons.Entities;
 using OneCore.CategorEyes.Commons.Requests;
 using OneCore.CategorEyes.Commons.Responses;
-using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Drawing.Imaging;
-using System.Linq;
 using System.Text;
 using System.Text.Json;
 using static OneCore.CategorEyes.Commons.Consts.OpenAI;
@@ -40,7 +34,7 @@ namespace OneCore.CategorEyes.Business.Analysis
             await _unitOfWork.HistoricalRepository.AddAsync(new Historical
             {
                 HistoricalType = (byte)HistoricalType.DocumentUpload,
-                Data = JsonSerializer.Serialize(request)
+                Description = JsonSerializer.Serialize(request)
             });
 
             if (request.FileType == FileType.Unknown)
@@ -59,7 +53,7 @@ namespace OneCore.CategorEyes.Business.Analysis
             await _unitOfWork.HistoricalRepository.AddAsync(new Historical
             {
                 HistoricalType = (byte)HistoricalType.IA,
-                Data = JsonSerializer.Serialize(response)
+                Description = JsonSerializer.Serialize(response)
             });
 
             await _unitOfWork.CompleteAsync();

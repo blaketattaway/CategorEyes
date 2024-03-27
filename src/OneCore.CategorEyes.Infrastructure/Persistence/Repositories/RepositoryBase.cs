@@ -40,7 +40,7 @@ namespace OneCore.CategorEyes.Infrastructure.Persistence.Repositories
             return await _dbContext.Set<T>().Where(predicate).ToListAsync();
         }
 
-        public async Task<(IReadOnlyList<T>, int)> GetPagedAsync(int page, int pageSize, 
+        public async Task<(IReadOnlyList<T>, int)> GetPagedAsync(int skip, int take, 
             Expression<Func<T, bool>>? predicate = null,
             bool disableTracking = true)
         {
@@ -49,7 +49,7 @@ namespace OneCore.CategorEyes.Infrastructure.Persistence.Repositories
 
             if (predicate is not null) query = query.Where(predicate);
 
-            return (await query.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync(), await query.CountAsync());
+            return (await query.Skip(skip).Take(take).ToListAsync(), await query.CountAsync());
         }
 
         public async Task<T?> GetByIdAsync(long id)

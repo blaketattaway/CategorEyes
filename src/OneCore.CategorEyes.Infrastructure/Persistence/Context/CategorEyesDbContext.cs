@@ -23,7 +23,7 @@ namespace OneCore.CategorEyes.Infrastructure.Persistence.Context
 
         protected override void OnConfiguring(DbContextOptionsBuilder dataContext)
         {
-            dataContext.UseSqlServer(ConfigurationHelper.Value("ConnectionStrings:CategorEyes"));
+            dataContext.UseSqlServer("Server=DESKTOP-GPD86LJ;Database=CategorEyes;User Id=categoreyes_login;Password=categoreyes_password;MultipleActiveResultSets=True;");
         }
 
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)

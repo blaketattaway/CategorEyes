@@ -8,9 +8,8 @@ namespace OneCore.CategorEyes.Commons.Requests
 {
     public class LogRequest
     {
-        public int PageSize { get; set; } = 10;
-        public int Page { get; set; } = 1;
-        public int TotalPages { get; set; }
+        public int Take { get; set; }
+        public int Skip { get; set; }
         public string? Filter { get; set; }
     }
 }
