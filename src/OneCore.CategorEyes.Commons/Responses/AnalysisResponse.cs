@@ -13,5 +13,6 @@ namespace OneCore.CategorEyes.Commons.Responses
         public DocumentType DocumentType { get; set; }
         public string Data { get; set; }
         public string AdditionalData { get; set; }
+        public string FileName { get; set; }
     }
 }

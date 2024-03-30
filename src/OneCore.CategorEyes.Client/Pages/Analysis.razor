@@ -51,6 +51,9 @@
                     var generalTextData = JsonSerializer.Deserialize<GeneralText>(analysisResponse.Data);
                     await ShowGeneralDataDialog(generalTextData, analysisResponse.AdditionalData);
                     break;
+                case DocumentType.Other:
+                    await ShowOtherDialog(analysisResponse.AdditionalData);
+                    break;
             }
         }
         catch (Exception)
@@ -105,6 +108,18 @@
         }
         Total: @(invoice?.Total.ToString() ?? string.Empty) <br />
         AdditionalData: @(additionalData ?? string.Empty)
+    </div>, new DialogOptions()
+          {
+              CssClass = "custom-dialog-class",
+              WrapperCssClass = "custom-dialog-wrapper-class"
+          });
+    }
+
+    async Task ShowOtherDialog(string additionalData)
+    {
+        await DialogService.OpenAsync("Unidentified", ds =>
+    @<div>
+        Description: @additionalData<br />
     </div>, new DialogOptions()
           {
               CssClass = "custom-dialog-class",

@@ -24,6 +24,7 @@ namespace OneCore.CategorEyes.Infrastructure
             services.AddDbContext<CategorEyesDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("CategorEyes")));
             services.AddBusiness();
             services.AddScoped<IOpenAIService, OpenAIService>();
+            services.AddScoped<IBlobService, BlobService>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped(typeof(IAsyncRepository<>), typeof(RepositoryBase<>));
             return services;

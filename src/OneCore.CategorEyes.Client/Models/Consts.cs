@@ -36,6 +36,7 @@ namespace OneCore.CategorEyes.Client.Models
         public static class URLs
         {
             public const string CATEGOREYES_API = "https://localhost:7112/api/";
+            public const string BLOB_STORAGE_URL = "https://categoreyes.blob.core.windows.net/uploads/";
         }
 
         public static class ContentType

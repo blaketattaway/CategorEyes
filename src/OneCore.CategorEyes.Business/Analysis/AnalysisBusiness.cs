@@ -3,6 +3,7 @@ using iText.Kernel.Pdf.Canvas.Parser;
 using iText.Kernel.Pdf.Canvas.Parser.Listener;
 using OneCore.CategorEyes.Business.Persistence;
 using OneCore.CategorEyes.Business.Services;
+using OneCore.CategorEyes.Commons.Blob;
 using OneCore.CategorEyes.Commons.Consts;
 using OneCore.CategorEyes.Commons.Entities;
 using OneCore.CategorEyes.Commons.Requests;
@@ -22,44 +23,65 @@ namespace OneCore.CategorEyes.Business.Analysis
         private const string TEXT_TO_REPLACE = "#{replaceLine}";
         private readonly IOpenAIService _openAIService;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IBlobService _blobService;
 
-        public AnalysisBusiness(IOpenAIService openAIService, IUnitOfWork unitOfWork)
+        public AnalysisBusiness(IOpenAIService openAIService, IUnitOfWork unitOfWork, IBlobService blobService)
         {
             _openAIService = openAIService;
             _unitOfWork = unitOfWork;
+            _blobService = blobService;
         }
 
         public async Task<AnalysisResponse> Analyze(AnalysisRequest request)
         {
-            await _unitOfWork.HistoricalRepository.AddAsync(new Historical
+            try
             {
-                HistoricalType = (byte)HistoricalType.DocumentUpload,
-                Description = JsonSerializer.Serialize(request)
-            });
+                string fileName = await UploadFile(new FileUpload
+                {
+                    Base64File = request.Base64File,
+                    ContentType = request.FileTypeName,
+                    Extension = request.FileTypeName.Split('/')[1]
+                });
 
-            if (request.FileType == FileType.Unknown)
-                throw new ArgumentException("Unknown file type");
+                await _unitOfWork.HistoricalRepository.AddAsync(new Historical
+                {
+                    HistoricalType = (byte)HistoricalType.DocumentUpload,
+                    Description = fileName
+                });
 
-            var openAIResponse = await _openAIService.Analyze(CreateOpenAIRequest(request));
+                if (request.FileType == FileType.Unknown)
+                    throw new ArgumentException("Unknown file type");
 
-            if (!openAIResponse.choices.Any())
-                throw new Exception("No response from OpenAI");
+                var openAIResponse = await _openAIService.Analyze(CreateOpenAIRequest(request));
 
-            AnalysisResponse response = ParseTo<AnalysisResponse>(RemoveInvalidChars(openAIResponse.choices.FirstOrDefault()!.message.content));
+                if (!openAIResponse.choices.Any())
+                    throw new Exception("No response from OpenAI");
 
-            if (Enum.TryParse(response.DocumentTypeName, out DocumentType documentType))
-                response.DocumentType = documentType;
+                AnalysisResponse response = ParseTo<AnalysisResponse>(RemoveInvalidChars(openAIResponse.choices.FirstOrDefault()!.message.content));
 
-            await _unitOfWork.HistoricalRepository.AddAsync(new Historical
+                if (Enum.TryParse(response.DocumentTypeName, out DocumentType documentType))
+                    response.DocumentType = documentType;
+
+                response.FileName = fileName;
+
+                await _unitOfWork.HistoricalRepository.AddAsync(new Historical
+                {
+                    HistoricalType = (byte)HistoricalType.IA,
+                    Description = JsonSerializer.Serialize(response)
+                });
+
+                await _unitOfWork.CompleteAsync();
+
+                return response;
+            }
+            catch (Exception)
             {
-                HistoricalType = (byte)HistoricalType.IA,
-                Description = JsonSerializer.Serialize(response)
-            });
-
-            await _unitOfWork.CompleteAsync();
-
-            return response;
+                throw;
+            }
         }
+
+        private async Task<string> UploadFile(FileUpload fileUpload)
+            => await _blobService.UploadFile(fileUpload);
 
         private static string ReadPdf(string base64String)
         {

@@ -1,5 +1,8 @@
-﻿@using System.ComponentModel.DataAnnotations;
+﻿@using System.ComponentModel.DataAnnotations
+@using System.Text.Json;
 @inject NotificationService NotificationService
+@inject DialogService DialogService
+@inject IJSRuntime JSRuntime
 @page "/historical"
 
 <RadzenButton Text="Reset" Click="@Reset" Style="margin-bottom: 20px;" />
@@ -12,7 +15,41 @@
         <RadzenDataGridColumn TItem="Models.Historical" Property="Id" Filterable="false" Title="ID" Frozen="true" Width="50px" TextAlign="TextAlign.Center" SortOrder="SortOrder.Ascending" />
         <RadzenDataGridColumn TItem="Models.Historical" Property="HistoricalTypeEnum" Title="Type" Frozen="true" Width="50px" TextAlign="TextAlign.Center" />
         <RadzenDataGridColumn TItem="Models.Historical" Property="CreationDate" Title="Date of Creation" Frozen="true" Width="50px" TextAlign="TextAlign.Center" />
-        <RadzenDataGridColumn TItem="Models.Historical" Property="Description" Title="Description" Frozen="true" Width="50px" TextAlign="TextAlign.Center" />
+        <RadzenDataGridColumn TItem="Models.Historical" Property="Description" Title="Description" Frozen="true" Sortable="false" Width="50px" TextAlign="TextAlign.Center" >
+            <Template Context="data">
+                @switch (data.HistoricalTypeEnum)
+                {
+                    case HistoricalType.DocumentUpload:
+                        <RadzenButton ButtonStyle="ButtonStyle.Info" Variant="Variant.Flat" Shade="Shade.Lighter" Icon="description" class="m-1" Click=@(async () => await JSRuntime.InvokeVoidAsync("open", data.Description, "_blank")) Text="" />
+                        break;
+                    case HistoricalType.IA:
+                        var documentInfo = JsonSerializer.Deserialize<AnalysisResponse>(data.Description);
+                        if (documentInfo is not null)
+                        {
+                            <RadzenButton ButtonStyle="ButtonStyle.Info" Variant="Variant.Flat" Shade="Shade.Lighter" Icon="description" class="m-1" Click=@(async () => await JSRuntime.InvokeVoidAsync("open", $"{ URLs.BLOB_STORAGE_URL }{ documentInfo.FileName }", "_blank")) Text="" />
+                            
+                            switch (documentInfo.DocumentType)
+                            {
+                                case DocumentType.Invoice:
+                                    var invoiceData = JsonSerializer.Deserialize<Invoice>(documentInfo.Data);
+                                    <RadzenButton ButtonStyle="ButtonStyle.Info" Variant="Variant.Flat" Shade="Shade.Lighter" Icon="info" class="m-1" Click=@(async () => await ShowInvoiceDialog(invoiceData, documentInfo.AdditionalData)) Text="" />
+                                    break;
+                                case DocumentType.GeneralText:
+                                    var generalTextData = JsonSerializer.Deserialize<GeneralText>(documentInfo.Data);
+                                    <RadzenButton ButtonStyle="ButtonStyle.Info" Variant="Variant.Flat" Shade="Shade.Lighter" Icon="info" class="m-1" Click=@(async () => await ShowGeneralDataDialog(generalTextData, documentInfo.AdditionalData)) Text="" />
+                                    break;
+                                case DocumentType.Other:
+                                    <RadzenButton ButtonStyle="ButtonStyle.Info" Variant="Variant.Flat" Shade="Shade.Lighter" Icon="info" class="m-1" Click=@(async () =>await ShowOtherDialog(documentInfo.AdditionalData)) Text="" />
+                                    break;
+                            }
+                        }
+                        break;
+                    case HistoricalType.UserInteraction:
+                        @data.Description
+                        break;
+                }
+            </Template>
+        </RadzenDataGridColumn>
     </Columns>
     <LoadingTemplate>
         <RadzenProgressBarCircular ProgressBarStyle="ProgressBarStyle.Primary" Value="100" ShowValue="false" Mode="ProgressBarMode.Indeterminate" />
@@ -44,10 +81,19 @@
                     Sort = GetSort(loadDataArgs)
                 });
 
-            logsResponse.Historicals.ForEach(h =>
+            foreach (var historical in logsResponse.Historicals)
             {
-                h.HistoricalTypeEnum = (HistoricalType)h.HistoricalType;
-            });
+                historical.HistoricalTypeEnum = (HistoricalType)historical.HistoricalType;
+
+                switch (historical.HistoricalTypeEnum)
+                {
+                    case HistoricalType.DocumentUpload:
+                        historical.Description = $"{ URLs.BLOB_STORAGE_URL }{ historical.Description }";
+                        break;
+                    case HistoricalType.IA:
+                        break;
+                }
+            }
 
             historicals = logsResponse.Historicals.AsODataEnumerable<Models.Historical>();
             count = logsResponse.TotalPages;
@@ -82,6 +128,58 @@
 
     private async Task ExporToExcel()
     {
-        
+
+    }
+
+    async Task ShowGeneralDataDialog(GeneralText? generalText, string additionalData)
+    {
+        await DialogService.OpenAsync("General Data", ds =>
+    @<div>
+        Description: @(generalText?.Description ?? string.Empty)<br />
+        Summary: @(generalText?.Summary ?? string.Empty)<br />
+        Sentiment: @(generalText?.Sentiment ?? string.Empty) <br />
+    </div>, new DialogOptions()
+              {
+                  CssClass = "custom-dialog-class",
+                  WrapperCssClass = "custom-dialog-wrapper-class"
+              });
+    }
+
+    async Task ShowInvoiceDialog(Invoice? invoice, string additionalData)
+    {
+        await DialogService.OpenAsync("General Data", ds =>
+    @<div>
+        Cliente: @(invoice?.ClientInfo ?? string.Empty)<br />
+        Proveedor: @(invoice?.ProviderInfo ?? string.Empty)<br />
+        Fecha: @(invoice?.Date ?? string.Empty) <br />
+        Productos: <br />
+        @foreach (var product in invoice?.Products ?? new List<Product>())
+        {
+            <div>
+                Nombre: @(product.ProductName ?? string.Empty) <br />
+                Cantidad: @(product.Quantity.ToString() ?? string.Empty) <br />
+                Precio: @(product.UnitPrice.ToString() ?? string.Empty) <br />
+                Total: @(product.Total.ToString() ?? string.Empty) <br />
+            </div>
+        }
+        Total: @(invoice?.Total.ToString() ?? string.Empty) <br />
+        AdditionalData: @(additionalData ?? string.Empty)
+    </div>, new DialogOptions()
+              {
+                  CssClass = "custom-dialog-class",
+                  WrapperCssClass = "custom-dialog-wrapper-class"
+              });
+    }
+
+    async Task ShowOtherDialog(string additionalData)
+    {
+        await DialogService.OpenAsync("Unidentified", ds =>
+    @<div>
+        Description: @additionalData<br />
+    </div>, new DialogOptions()
+          {
+              CssClass = "custom-dialog-class",
+              WrapperCssClass = "custom-dialog-wrapper-class"
+          });
     }
 }
