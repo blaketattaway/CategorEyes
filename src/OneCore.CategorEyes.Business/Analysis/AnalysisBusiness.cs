@@ -1,6 +1,7 @@
 ﻿using iText.Kernel.Pdf;
 using iText.Kernel.Pdf.Canvas.Parser;
 using iText.Kernel.Pdf.Canvas.Parser.Listener;
+using Microsoft.Extensions.Logging;
 using OneCore.CategorEyes.Business.Persistence;
 using OneCore.CategorEyes.Business.Services;
 using OneCore.CategorEyes.Commons.Blob;
@@ -24,24 +25,21 @@ namespace OneCore.CategorEyes.Business.Analysis
         private readonly IOpenAIService _openAIService;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IBlobService _blobService;
+        private readonly ILogger<AnalysisBusiness> _logger;
 
-        public AnalysisBusiness(IOpenAIService openAIService, IUnitOfWork unitOfWork, IBlobService blobService)
+        public AnalysisBusiness(IOpenAIService openAIService, IUnitOfWork unitOfWork, IBlobService blobService, ILogger<AnalysisBusiness> logger)
         {
             _openAIService = openAIService;
             _unitOfWork = unitOfWork;
             _blobService = blobService;
+            _logger = logger;
         }
 
         public async Task<AnalysisResponse> Analyze(AnalysisRequest request)
         {
             try
             {
-                string fileName = await UploadFile(new FileUpload
-                {
-                    Base64File = request.Base64File,
-                    ContentType = request.FileTypeName,
-                    Extension = request.FileTypeName.Split('/')[1]
-                });
+                string fileName = await UploadFileAndLog(request);
 
                 await _unitOfWork.HistoricalRepository.AddAsync(new Historical
                 {
@@ -49,35 +47,56 @@ namespace OneCore.CategorEyes.Business.Analysis
                     Description = fileName
                 });
 
-                if (request.FileType == FileType.Unknown)
-                    throw new ArgumentException("Unknown file type");
+                ValidateRequest(request);
 
-                var openAIResponse = await _openAIService.Analyze(CreateOpenAIRequest(request));
+                var openAIResponse = await GetOpenAIResponse(request);
 
-                if (!openAIResponse.choices.Any())
-                    throw new Exception("No response from OpenAI");
+                var response = ProcessOpenAIResponse(openAIResponse, fileName);
 
-                AnalysisResponse response = ParseTo<AnalysisResponse>(RemoveInvalidChars(openAIResponse.choices.FirstOrDefault()!.message.content));
-
-                if (Enum.TryParse(response.DocumentTypeName, out DocumentType documentType))
-                    response.DocumentType = documentType;
-
-                response.FileName = fileName;
-
-                await _unitOfWork.HistoricalRepository.AddAsync(new Historical
-                {
-                    HistoricalType = (byte)HistoricalType.IA,
-                    Description = JsonSerializer.Serialize(response)
-                });
-
-                await _unitOfWork.CompleteAsync();
+                await SaveAnalysisResultLog(response);
 
                 return response;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                _logger.LogError(ex.Message);
                 throw;
             }
+        }
+
+        private async Task<OpenAIAnalysisResponse> GetOpenAIResponse(AnalysisRequest request)
+        {
+            var openAIRequest = CreateOpenAIRequest(request);
+            var openAIResponse = await _openAIService.Analyze(openAIRequest);
+
+            if (!openAIResponse.choices.Any())
+                throw new Exception("No response from OpenAI");
+
+            return openAIResponse;
+        }
+
+        private AnalysisResponse ProcessOpenAIResponse(OpenAIAnalysisResponse openAIResponse, string fileName)
+        {
+            var responseContent = RemoveInvalidChars(openAIResponse.choices.FirstOrDefault()!.message.content);
+            var response = ParseTo<AnalysisResponse>(responseContent);
+
+            if (Enum.TryParse(response.DocumentTypeName, out DocumentType documentType))
+                response.DocumentType = documentType;
+
+            response.FileName = fileName;
+
+            return response;
+        }
+
+        private async Task SaveAnalysisResultLog(AnalysisResponse response)
+        {
+            await _unitOfWork.HistoricalRepository.AddAsync(new Historical
+            {
+                HistoricalType = (byte)HistoricalType.IA,
+                Description = JsonSerializer.Serialize(response)
+            });
+
+            await _unitOfWork.CompleteAsync();
         }
 
         private async Task<string> UploadFile(FileUpload fileUpload)
@@ -148,6 +167,30 @@ namespace OneCore.CategorEyes.Business.Analysis
                 messages = new List<object> { new { role = Roles.USER, content = content } },
                 max_tokens = 1000
             };
+        }
+
+        private void ValidateRequest(AnalysisRequest request)
+        {
+            if (request.FileType == FileType.Unknown)
+                throw new ArgumentException("Unknown file type");
+        }
+
+        private async Task<string> UploadFileAndLog(AnalysisRequest request)
+        {
+            try
+            {
+                return await _blobService.UploadFile(new FileUpload
+                {
+                    Base64File = request.Base64File,
+                    ContentType = request.FileTypeName,
+                    Extension = request.FileTypeName.Split('/')[1]
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                return string.Empty;
+            }
         }
     }
 }
