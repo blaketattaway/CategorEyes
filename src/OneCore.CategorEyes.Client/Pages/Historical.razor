@@ -6,16 +6,16 @@
 @page "/historical"
 
 <RadzenButton Text="Reset" Click="@Reset" Style="margin-bottom: 20px;" />
-<RadzenButton Text="Export" Click="@ExporToExcel" Style="margin-bottom: 20px; float: right" Icon="description" ButtonStyle="ButtonStyle.Success" />
+<RadzenButton Text="@Resource.Export" Click="@ExporToExcel" Style="margin-bottom: 20px; float: right" Icon="description" ButtonStyle="ButtonStyle.Success" />
 <RadzenDataGrid @ref="grid" SelectionMode="DataGridSelectionMode.Multiple" KeyProperty="Id" IsLoading="@isLoading" Count="@count" Data="@historicals"
                 LoadData="@LoadData" FilterPopupRenderMode="PopupRenderMode.OnDemand" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
                 FilterMode="FilterMode.Advanced" AllowSorting="true" AllowFiltering="true" AllowPaging="true" PageSize="10"
                 PagerHorizontalAlign="HorizontalAlign.Center" TItem="Models.Historical" ColumnWidth="200px" LogicalFilterOperator="LogicalFilterOperator.And" GotoFirstPageOnSort="true">
     <Columns>
         <RadzenDataGridColumn TItem="Models.Historical" Property="Id" Filterable="false" Title="ID" Frozen="true" Width="50px" TextAlign="TextAlign.Center" SortOrder="SortOrder.Ascending" />
-        <RadzenDataGridColumn TItem="Models.Historical" Property="HistoricalTypeEnum" Title="Type" Frozen="true" Width="50px" TextAlign="TextAlign.Center" />
-        <RadzenDataGridColumn TItem="Models.Historical" Property="CreationDate" Title="Date of Creation" Frozen="true" Width="50px" TextAlign="TextAlign.Center" />
-        <RadzenDataGridColumn TItem="Models.Historical" Property="Description" Title="Description" Frozen="true" Sortable="false" Width="50px" TextAlign="TextAlign.Center" >
+        <RadzenDataGridColumn TItem="Models.Historical" Property="HistoricalTypeEnum" Title="@Resource.Type" Frozen="true" Width="50px" TextAlign="TextAlign.Center" />
+        <RadzenDataGridColumn TItem="Models.Historical" Property="CreationDate" Title="@Resource.DateOfCreation" Frozen="true" Width="50px" TextAlign="TextAlign.Center" />
+        <RadzenDataGridColumn TItem="Models.Historical" Property="Description" Title="@Resource.Description" Frozen="true" Sortable="false" Width="50px" TextAlign="TextAlign.Center" >
             <Template Context="data">
                 @switch (data.HistoricalTypeEnum)
                 {
@@ -100,7 +100,7 @@
         }
         catch (Exception)
         {
-            NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Error", Detail = "An Error Ocurred" });
+            NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Error", Detail = Resource.AnErrorOcurred });
         }
 
         isLoading = false;

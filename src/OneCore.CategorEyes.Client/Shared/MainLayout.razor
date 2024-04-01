@@ -6,12 +6,13 @@
             <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0">
                 <RadzenSidebarToggle Click="@ToggleSideBar" />
                 <RadzenLabel Text="CategorEyes" />
+                <CultureSelector />
             </RadzenStack>
         </RadzenHeader>
         <RadzenSidebar @bind-Expanded="@expandedSideBar">
             <RadzenPanelMenu>
-                <RadzenPanelMenuItem Text="Analysis" Icon="psychology" Path="/" />
-                <RadzenPanelMenuItem Text="Historical" Icon="insights" Path="historical" />
+                <RadzenPanelMenuItem Text="@(Resource.Analysis)" Icon="psychology" Path="/" />
+                <RadzenPanelMenuItem Text="@(Resource.Historical)" Icon="insights" Path="historical" />
             </RadzenPanelMenu>
         </RadzenSidebar>
         <RadzenBody>

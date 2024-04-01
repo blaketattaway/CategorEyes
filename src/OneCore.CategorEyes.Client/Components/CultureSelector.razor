@@ -1,0 +1,48 @@
+﻿@inject IJSRuntime JsRuntime
+@inject NavigationManager NavigationManager
+@using System.Globalization
+
+<div style="position:absolute; right:0;">
+    <RadzenDropDown TValue="string" Value=@(GetCultureName(Culture)) Data=@cultureNames Change="@(args => Culture = new CultureInfo(cultures[$"{args}"]) )" Style="width: 100%; max-width: 400px;" Name="DropDownChangeEvent" />
+</div>
+
+@code {
+    List<string> cultureNames = new List<string> { Resource.English, Resource.Spanish };
+
+    Dictionary<string, string> cultures = new Dictionary<string, string>
+    {
+        { Resource.English, "en-US" },
+        { Resource.Spanish, "es-MX" },
+    };
+
+    CultureInfo Culture
+    {
+        get => CultureInfo.CurrentCulture;
+        set
+        {
+            if (CultureInfo.CurrentCulture != value)
+            {
+                var js = (IJSInProcessRuntime)JsRuntime;
+                js.InvokeVoid("blazorCulture.set", value.Name);
+
+                NavigationManager.NavigateTo(NavigationManager.Uri, forceLoad: true);
+            }
+        }
+    }
+
+    private string GetCultureName(CultureInfo culture)
+    {
+        if (culture.Name == "en-US")
+        {
+            return Resource.English;
+        }
+        else if (culture.Name == "es-MX")
+        {
+            return Resource.Spanish;
+        }
+        else
+        {
+            return Resource.English;
+        }
+    }
+}

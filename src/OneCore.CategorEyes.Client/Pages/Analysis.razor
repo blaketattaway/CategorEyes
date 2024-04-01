@@ -8,20 +8,18 @@
 <div class="container">
     <div class="row">
         <div class="col-12 mb-4">
-            Use below section to upload your file and start the analysis.
+            @Resource.AnalysisMessage
         </div>
     </div>
-    <DropZone AcceptedFileTypes="@ACCEPTED_FILE_TYPES" ErrorNotification="@FILE_ERROR_NOTIFICATION" OnFileSelect="@SendToAnalyze" HelpText="@HELP_TEXT"/>
+    <DropZone AcceptedFileTypes="@ACCEPTED_FILE_TYPES" ErrorNotification="@Resource.AnalysisFileErrorMessage" OnFileSelect="@SendToAnalyze" HelpText="@Resource.AnalysisDragNDropMessage" />
 </div>
 
 
 @code {
     const int MAX_FILE_SIZE = 5242880;
     const string ACCEPTED_FILE_TYPES = "image/png,image/jpeg,application/pdf";
-    const string FILE_ERROR_NOTIFICATION = "File size should be less than 5MB and file extension should be png, jpg or pdf.";
     const string PDF_FILE_TYPE = "application/pdf";
     const string IMAGE_FILE_TYPE = "image";
-    const string HELP_TEXT = "Drag your file here or click to upload, only one file per upload is allowed.";
 
     private async Task SendToAnalyze(List<IFileListEntry> files)
     {
@@ -58,7 +56,7 @@
         }
         catch (Exception)
         {
-            NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Error", Detail = "An Error Ocurred" });
+            NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Error", Detail = Resource.AnErrorOcurred });
         }
     }
 
@@ -77,11 +75,11 @@
 
     async Task ShowGeneralDataDialog(GeneralText? generalText, string additionalData)
     {
-        await DialogService.OpenAsync("General Data", ds =>
+        await DialogService.OpenAsync(Resource.GeneralText, ds =>
     @<div>
-        Description: @(generalText?.Description ?? string.Empty)<br />
-        Summary: @(generalText?.Summary ?? string.Empty)<br />
-        Sentiment: @(generalText?.Sentiment ?? string.Empty) <br />
+        @Resource.Description: @(generalText?.Description ?? string.Empty)<br />
+        @Resource.Summary: @(generalText?.Summary ?? string.Empty)<br />
+        @Resource.Sentiment: @(generalText?.Sentiment ?? string.Empty) <br />
     </div>, new DialogOptions()
           {
               CssClass = "custom-dialog-class",
@@ -91,23 +89,23 @@
 
     async Task ShowInvoiceDialog(Invoice? invoice, string additionalData)
     {
-        await DialogService.OpenAsync("General Data", ds =>
+        await DialogService.OpenAsync(Resource.Invoice, ds =>
     @<div>
-        Cliente: @(invoice?.ClientInfo ?? string.Empty)<br />
-        Proveedor: @(invoice?.ProviderInfo ?? string.Empty)<br />
-        Fecha: @(invoice?.Date ?? string.Empty) <br />
-        Productos: <br />
+        @Resource.Client: @(invoice?.ClientInfo ?? string.Empty)<br />
+        @Resource.Provider: @(invoice?.ProviderInfo ?? string.Empty)<br />
+        @Resource.Date: @(invoice?.Date ?? string.Empty) <br />
+        @Resource.Products: <br />
         @foreach (var product in invoice?.Products ?? new List<Product>())
         {
             <div>
-                Nombre: @(product.ProductName ?? string.Empty) <br />
-                Cantidad: @(product.Quantity.ToString() ?? string.Empty) <br />
-                Precio: @(product.UnitPrice.ToString() ?? string.Empty) <br />
-                Total: @(product.Total.ToString() ?? string.Empty) <br />
+                @Resource.Name: @(product.ProductName ?? string.Empty) <br />
+                @Resource.Quantity: @(product.Quantity.ToString() ?? string.Empty) <br />
+                @Resource.Price: @(product.UnitPrice.ToString() ?? string.Empty) <br />
+                @Resource.Total: @(product.Total.ToString() ?? string.Empty) <br />
             </div>
         }
-        Total: @(invoice?.Total.ToString() ?? string.Empty) <br />
-        AdditionalData: @(additionalData ?? string.Empty)
+        @Resource.Total: @(invoice?.Total.ToString() ?? string.Empty) <br />
+        @Resource.AdditionalData: @(additionalData ?? string.Empty)
     </div>, new DialogOptions()
           {
               CssClass = "custom-dialog-class",
@@ -119,7 +117,7 @@
     {
         await DialogService.OpenAsync("Unidentified", ds =>
     @<div>
-        Description: @additionalData<br />
+        @Resource.Description: @additionalData<br />
     </div>, new DialogOptions()
           {
               CssClass = "custom-dialog-class",

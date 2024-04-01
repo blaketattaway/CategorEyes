@@ -9,13 +9,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OneCore.CategorEyes.Client"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OneCore.CategorEyes.API", "src\OneCore.CategorEyes.API\OneCore.CategorEyes.API.csproj", "{FE612767-3830-400D-B776-6920AE80F215}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OneCore.CategorEyes.Business", "src\OneCore.CategorEyes.Business\OneCore.CategorEyes.Business.csproj", "{905FEF1F-D627-45C6-BBE6-DDB423A51045}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OneCore.CategorEyes.Business", "src\OneCore.CategorEyes.Business\OneCore.CategorEyes.Business.csproj", "{905FEF1F-D627-45C6-BBE6-DDB423A51045}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OneCore.CategorEyes.Commons", "src\OneCore.CategorEyes.Commons\OneCore.CategorEyes.Commons.csproj", "{4BBB4356-E8DE-4EC5-9FA5-10DACC8337BE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OneCore.CategorEyes.Commons", "src\OneCore.CategorEyes.Commons\OneCore.CategorEyes.Commons.csproj", "{4BBB4356-E8DE-4EC5-9FA5-10DACC8337BE}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{F4FD867F-40A1-490A-BB2F-37B796E228BE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OneCore.CategorEyes.Infrastructure", "src\OneCore.CategorEyes.Infrastructure\OneCore.CategorEyes.Infrastructure.csproj", "{EBC11883-4233-4D3E-8112-DFD92EE712DD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OneCore.CategorEyes.Infrastructure", "src\OneCore.CategorEyes.Infrastructure\OneCore.CategorEyes.Infrastructure.csproj", "{EBC11883-4233-4D3E-8112-DFD92EE712DD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

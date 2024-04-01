@@ -50,17 +50,14 @@
 
         if (HelpText is null)
         {
-            HelpText = "Drag files here or click to upload.";
+            HelpText = Resource.GenericDragNDropMessage;
         }
     }
 
     const int MaxFileSizeMB = 5;
     const int MaxFileSize = MaxFileSizeMB * 1024 * 1024; // 5MB
     private string dropClass = "";
-    private bool fileSizeError = false;
-    private bool fileTypeError = false;
     private List<IFileListEntry> selectedFiles = new List<IFileListEntry>();
-    //HttpClient httpClient = new HttpClient();
 
     private void HandleDragEnter()
     {
@@ -76,30 +73,17 @@
     {
         if (files.Length > MaxFiles)
         {
-            NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Error", Detail = "Max number of files surpassed" });
+            NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Error", Detail = Resource.MaxNumberOfFilesSurpassed });
             return;
         }
 
         dropClass = "";
-        fileSizeError = false;
-        fileTypeError = false;
         List<string> acceptedFileTypes = AcceptedFileTypes.Split(',').ToList();
         if (files != null)
         {
             foreach (var file in files)
             {
-                bool error = false;
-                if (file.Size > MaxFileSize)
-                {
-                    error = true;
-                    fileSizeError = true;
-                }
-
-                if (!acceptedFileTypes.Contains(file.Type))
-                {
-                    error = true;
-                    fileTypeError = true;
-                }
+                bool error = file.Size > MaxFileSize || !acceptedFileTypes.Contains(file.Type);
 
                 //keep the good files
                 if (!error)
