@@ -9,11 +9,6 @@ using OneCore.CategorEyes.Infrastructure.Persistence;
 using OneCore.CategorEyes.Infrastructure.Persistence.Context;
 using OneCore.CategorEyes.Infrastructure.Persistence.Repositories;
 using OneCore.CategorEyes.Infrastructure.Services;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace OneCore.CategorEyes.Infrastructure
 {

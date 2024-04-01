@@ -4,11 +4,6 @@ using Microsoft.Extensions.Configuration;
 using OneCore.CategorEyes.Business.Services;
 using OneCore.CategorEyes.Commons.Blob;
 using OneCore.CategorEyes.Commons.Consts;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace OneCore.CategorEyes.Infrastructure.Services
 {
@@ -24,7 +19,7 @@ namespace OneCore.CategorEyes.Infrastructure.Services
         public async Task<string> UploadFile(FileUpload fileUpload)
         {
             string fileExtension = fileUpload.Extension;
-            string fileName = $"{ Guid.NewGuid() }.{ fileExtension }";
+            string fileName = $"{Guid.NewGuid()}.{fileExtension}";
             byte[] bytes = Convert.FromBase64String(fileUpload.Base64File);
             using MemoryStream fileToUploadStream = new();
             fileToUploadStream.Write(bytes, 0, bytes.Length);

@@ -1,6 +1,6 @@
-﻿using Microsoft.JSInterop;
+﻿using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+using Microsoft.JSInterop;
 using System.Globalization;
-using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 
 namespace OneCore.CategorEyes.Client.Extensions
 {

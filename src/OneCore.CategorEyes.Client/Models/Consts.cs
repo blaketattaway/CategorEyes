@@ -5,7 +5,7 @@ namespace OneCore.CategorEyes.Client.Models
     public class Consts
     {
         public enum BaseAPI
-        { 
+        {
             CategorEyes
         }
 

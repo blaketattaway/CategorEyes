@@ -1,7 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using OneCore.CategorEyes.Business.Analysis;
-using OneCore.CategorEyes.Commons.Consts;
 using OneCore.CategorEyes.Commons.Requests;
 
 namespace OneCore.CategorEyes.API.Controllers
@@ -17,7 +15,7 @@ namespace OneCore.CategorEyes.API.Controllers
             _analysisBusiness = analysisBusiness;
         }
 
-        [HttpPost ("Analyze")]
+        [HttpPost("Analyze")]
         public async Task<IActionResult> Analyze(AnalysisRequest request)
         {
             return Ok(await _analysisBusiness.Analyze(request));

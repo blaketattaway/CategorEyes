@@ -25,7 +25,7 @@ namespace OneCore.CategorEyes.Client.Utils
 
         public RestConsumer(BaseAPI baseAPI)
         {
-            switch(baseAPI)
+            switch (baseAPI)
             {
                 case BaseAPI.CategorEyes:
                     _client = _categorEyesAPIClient;

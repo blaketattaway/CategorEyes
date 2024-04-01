@@ -6,7 +6,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddInfrastructure(builder.Configuration);
 
-builder.Services.AddCors(policy => {
+builder.Services.AddCors(policy =>
+{
 
     policy.AddPolicy("Default_Policy", builder =>
       builder.AllowAnyOrigin()

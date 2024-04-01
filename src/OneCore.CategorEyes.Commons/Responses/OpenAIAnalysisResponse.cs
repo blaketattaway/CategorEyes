@@ -1,10 +1,4 @@
-﻿using OneCore.CategorEyes.Commons.Consts;
-using OneCore.CategorEyes.Commons.OpenAI;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using OneCore.CategorEyes.Commons.OpenAI;
 
 namespace OneCore.CategorEyes.Commons.Responses
 {

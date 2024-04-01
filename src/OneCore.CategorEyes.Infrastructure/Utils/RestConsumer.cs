@@ -1,11 +1,7 @@
 ﻿using Newtonsoft.Json;
 using OneCore.CategorEyes.Commons.Consts;
 using OneCore.CategorEyes.Infrastructure.Helpers;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace OneCore.CategorEyes.Infrastructure.Utils
 {

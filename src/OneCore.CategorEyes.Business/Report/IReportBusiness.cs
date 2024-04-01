@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace OneCore.CategorEyes.Business.Report
+﻿namespace OneCore.CategorEyes.Business.Report
 {
     public interface IReportBusiness
     {

@@ -1,17 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using OneCore.CategorEyes.Business.Persistence.Repositories;
-using OneCore.CategorEyes.Commons.Entities.Common;
-using OneCore.CategorEyes.Infrastructure.Persistence.Context;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-using OneCore.CategorEyes.Infrastructure.Extensions;
-using OneCore.CategorEyes.Commons.Requests;
 using OneCore.CategorEyes.Commons.Consts;
+using OneCore.CategorEyes.Commons.Entities.Common;
+using OneCore.CategorEyes.Commons.Requests;
+using OneCore.CategorEyes.Infrastructure.Extensions;
+using OneCore.CategorEyes.Infrastructure.Persistence.Context;
+using System.Linq.Expressions;
 
 namespace OneCore.CategorEyes.Infrastructure.Persistence.Repositories
 {
@@ -29,7 +23,7 @@ namespace OneCore.CategorEyes.Infrastructure.Persistence.Repositories
             await _dbContext.Set<T>().AddAsync(entity);
         }
 
-        public async Task<(IReadOnlyList<T>, int)> GetPagedAsync(int skip, int take, 
+        public async Task<(IReadOnlyList<T>, int)> GetPagedAsync(int skip, int take,
             Expression<Func<T, bool>>? predicate = null,
             SortDescriptor? sortDescriptor = null,
             bool disableTracking = true)
@@ -47,13 +41,13 @@ namespace OneCore.CategorEyes.Infrastructure.Persistence.Repositories
                         return (await query.OrderBy(sortDescriptor.Property)
                                     .Skip(skip)
                                     .Take(take)
-                                    .ToListAsync(), 
+                                    .ToListAsync(),
                                 await query.CountAsync());
                     case SortOrder.Descending:
                         return (await query.OrderByDescending(sortDescriptor.Property)
                                     .Skip(skip)
                                     .Take(take)
-                                    .ToListAsync(), 
+                                    .ToListAsync(),
                                 await query.CountAsync());
                 }
             }

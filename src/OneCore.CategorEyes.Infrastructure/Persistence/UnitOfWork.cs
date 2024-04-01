@@ -3,12 +3,7 @@ using OneCore.CategorEyes.Business.Persistence.Repositories;
 using OneCore.CategorEyes.Commons.Entities.Common;
 using OneCore.CategorEyes.Infrastructure.Persistence.Context;
 using OneCore.CategorEyes.Infrastructure.Persistence.Repositories;
-using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace OneCore.CategorEyes.Infrastructure.Persistence
 {
