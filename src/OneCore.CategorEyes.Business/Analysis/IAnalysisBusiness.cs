@@ -6,10 +6,10 @@ namespace OneCore.CategorEyes.Business.Analysis
     public interface IAnalysisBusiness
     {
         /// <summary>
-        /// Analiza el documento proporcionado en la solicitud utilizando el servicio de OpenAI y registra los resultados.
+        /// Analyzes the document provided in the request using the OpenAI service and logs the results.
         /// </summary>
-        /// <param name="request">La solicitud de análisis, de tipo <see cref="AnalysisRequest"/>.</param>
-        /// <returns>Una tarea que representa la operación asincrónica y retorna una <see cref="AnalysisResponse"/> con los resultados del análisis.</returns>
+        /// <param name="request">The analysis request, of type <see cref="AnalysisRequest"/>.</param>
+        /// <returns>A task representing the asynchronous operation, returning an <see cref="AnalysisResponse"/> with the analysis results.</returns>
         Task<AnalysisResponse> Analyze(AnalysisRequest request);
     }
 }

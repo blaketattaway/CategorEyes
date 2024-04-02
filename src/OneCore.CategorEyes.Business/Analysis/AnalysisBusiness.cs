@@ -65,10 +65,10 @@ namespace OneCore.CategorEyes.Business.Analysis
         }
 
         /// <summary>
-        /// Obtiene una respuesta de análisis de OpenAI basada en la solicitud proporcionada.
+        /// Retrieves an analysis response from OpenAI based on the provided request.
         /// </summary>
-        /// <param name="request">La solicitud de análisis, de tipo <see cref="AnalysisRequest"/>.</param>
-        /// <returns>Una tarea que representa la operación asincrónica y retorna un <see cref="OpenAIAnalysisResponse"/> con la respuesta de OpenAI.</returns>
+        /// <param name="request">The analysis request, of type <see cref="AnalysisRequest"/>.</param>
+        /// <returns>A task representing the asynchronous operation, returning an <see cref="OpenAIAnalysisResponse"/> with OpenAI's response.</returns>
         private async Task<OpenAIAnalysisResponse> GetOpenAIResponse(AnalysisRequest request)
         {
             var openAIRequest = CreateOpenAIRequest(request);
@@ -79,13 +79,12 @@ namespace OneCore.CategorEyes.Business.Analysis
 
             return openAIResponse;
         }
-
         /// <summary>
-        /// Procesa la respuesta de OpenAI y genera una respuesta de análisis.
+        /// Processes the OpenAI response and generates an analysis response.
         /// </summary>
-        /// <param name="openAIResponse">La respuesta de OpenAI, de tipo <see cref="OpenAIAnalysisResponse"/>.</param>
-        /// <param name="fileName">El nombre del archivo analizado, de tipo <see cref="string"/>.</param>
-        /// <returns>La respuesta de análisis procesada, de tipo <see cref="AnalysisResponse"/>.</returns>
+        /// <param name="openAIResponse">OpenAI's response, of type <see cref="OpenAIAnalysisResponse"/>.</param>
+        /// <param name="fileName">The name of the analyzed file, of type <see cref="string"/>.</param>
+        /// <returns>The processed analysis response, of type <see cref="AnalysisResponse"/>.</returns>
         private AnalysisResponse ProcessOpenAIResponse(OpenAIAnalysisResponse openAIResponse, string fileName)
         {
             var responseContent = RemoveInvalidChars(openAIResponse.choices.FirstOrDefault()!.message.content);
@@ -100,10 +99,10 @@ namespace OneCore.CategorEyes.Business.Analysis
         }
 
         /// <summary>
-        /// Guarda un registro del resultado del análisis en el repositorio histórico.
+        /// Saves a log of the analysis result in the historical repository.
         /// </summary>
-        /// <param name="response">La respuesta de análisis a registrar, de tipo <see cref="AnalysisResponse"/>.</param>
-        /// <returns>Una tarea que representa la operación asincrónica.</returns>
+        /// <param name="response">The analysis response to log, of type <see cref="AnalysisResponse"/>.</param>
+        /// <returns>A task representing the asynchronous operation.</returns>
         private async Task SaveAnalysisResultLog(AnalysisResponse response)
         {
             await _unitOfWork.HistoricalRepository.AddAsync(new Historical
@@ -116,10 +115,10 @@ namespace OneCore.CategorEyes.Business.Analysis
         }
 
         /// <summary>
-        /// Lee el contenido de texto de un PDF codificado en base64.
+        /// Reads the text content from a base64-encoded PDF.
         /// </summary>
-        /// <param name="base64String">La cadena en base64 que representa el contenido del PDF, de tipo <see cref="string"/>.</param>
-        /// <returns>El texto extraído del PDF, de tipo <see cref="string"/>.</returns>
+        /// <param name="base64String">The base64 string representing the PDF content, of type <see cref="string"/>.</param>
+        /// <returns>The extracted text from the PDF, of type <see cref="string"/>.</returns>
         private static string ReadPdf(string base64String)
         {
             byte[] pdfBytes = Convert.FromBase64String(base64String);
@@ -143,26 +142,26 @@ namespace OneCore.CategorEyes.Business.Analysis
         }
 
         /// <summary>
-        /// Deserializa un JSON a un objeto del tipo especificado.
+        /// Deserializes a JSON string into an object of the specified type.
         /// </summary>
-        /// <param name="json">La cadena JSON a deserializar, de tipo <see cref="string"/>.</param>
-        /// <returns>El objeto deserializado del tipo especificado.</returns>
+        /// <param name="json">The JSON string to deserialize, of type <see cref="string"/>.</param>
+        /// <returns>The deserialized object of the specified type.</returns>
         private static T ParseTo<T>(string json)
             => JsonSerializer.Deserialize<T>(json)!;
 
         /// <summary>
-        /// Elimina caracteres inválidos de una cadena JSON.
+        /// Removes invalid characters from a JSON string.
         /// </summary>
-        /// <param name="json">La cadena JSON de la que eliminar los caracteres inválidos, de tipo <see cref="string"/>.</param>
-        /// <returns>La cadena JSON limpia, de tipo <see cref="string"/>.</returns>
+        /// <param name="json">The JSON string from which to remove invalid characters, of type <see cref="string"/>.</param>
+        /// <returns>The cleaned JSON string, of type <see cref="string"/>.</returns>
         private static string RemoveInvalidChars(string json)
             => json.Replace(JSON_START, string.Empty).Replace(JSON_END, string.Empty);
 
         /// <summary>
-        /// Crea una solicitud para el servicio de OpenAI basada en la solicitud de análisis proporcionada.
+        /// Creates a request for the OpenAI service based on the provided analysis request.
         /// </summary>
-        /// <param name="request">La solicitud de análisis, de tipo <see cref="AnalysisRequest"/>.</param>
-        /// <returns>La solicitud formateada para OpenAI, de tipo <see cref="object"/> debido a la estructura dinámica esperada por el servicio de OpenAI.</returns>
+        /// <param name="request">The analysis request, of type <see cref="AnalysisRequest"/>.</param>
+        /// <returns>The formatted request for OpenAI, of type <see cref="object"/> due to the dynamic structure expected by the OpenAI service.</returns>
         private object CreateOpenAIRequest(AnalysisRequest request)
         {
             return request.FileType switch
@@ -174,10 +173,10 @@ namespace OneCore.CategorEyes.Business.Analysis
         }
 
         /// <summary>
-        /// Crea una solicitud específica para análisis de documentos PDF para ser enviada al servicio de OpenAI.
+        /// Creates a specific request for PDF document analysis to be sent to the OpenAI service.
         /// </summary>
-        /// <param name="request">La solicitud de análisis que contiene el documento PDF codificado en Base64, de tipo <see cref="AnalysisRequest"/>.</param>
-        /// <returns>Una solicitud configurada para el análisis de PDFs, lista para ser enviada a OpenAI, de tipo <see cref="object"/> debido a la estructura dinámica esperada por el servicio de OpenAI.</returns>
+        /// <param name="request">The analysis request containing the base64-encoded PDF document, of type <see cref="AnalysisRequest"/>.</param>
+        /// <returns>A request configured for PDF analysis, ready to be sent to OpenAI, of type <see cref="object"/> due to the dynamic structure expected by the OpenAI service.</returns>
         private object CreatePdfRequest(AnalysisRequest request)
         {
             var content = new List<object>
@@ -190,10 +189,10 @@ namespace OneCore.CategorEyes.Business.Analysis
         }
 
         /// <summary>
-        /// Crea una solicitud específica para análisis de imágenes para ser enviada al servicio de OpenAI.
+        /// Creates a specific request for image analysis to be sent to the OpenAI service.
         /// </summary>
-        /// <param name="request">La solicitud de análisis que contiene la imagen codificada en Base64, de tipo <see cref="AnalysisRequest"/>.</param>
-        /// <returns>Una solicitud configurada para el análisis de imágenes, lista para ser enviada a OpenAI, de tipo <see cref="object"/> debido a la estructura dinámica esperada por el servicio de OpenAI.</returns>
+        /// <param name="request">The analysis request containing the base64-encoded image, of type <see cref="AnalysisRequest"/>.</param>
+        /// <returns>A request configured for image analysis, ready to be sent to OpenAI, of type <see cref="object"/> due to the dynamic structure expected by the OpenAI service.</returns>
         private object CreateImageRequest(AnalysisRequest request)
         {
             var content = new List<object>
@@ -206,10 +205,10 @@ namespace OneCore.CategorEyes.Business.Analysis
         }
 
         /// <summary>
-        /// Crea la estructura base de una solicitud para el servicio de OpenAI, incorporando el contenido específico para el análisis.
+        /// Creates the base structure of a request for the OpenAI service, incorporating the specific content for analysis.
         /// </summary>
-        /// <param name="content">El contenido específico del análisis, ya sea de un documento PDF o una imagen, representado como una lista de objetos <see cref="object"/> que siguen la estructura esperada por el servicio de OpenAI.</param>
-        /// <returns>La solicitud base configurada con el contenido específico para el análisis, de tipo <see cref="object"/> debido a la estructura dinámica esperada por el servicio de OpenAI.</returns>
+        /// <param name="content">The specific content of the analysis, whether for a PDF document or an image, represented as a list of <see cref="object"/> following the structure expected by the OpenAI service.</param>
+        /// <returns>The base request configured with the specific content for analysis, of type <see cref="object"/> due to the dynamic structure expected by the OpenAI service.</returns>
         private object CreateBaseRequest(List<object> content)
         {
             return new
@@ -221,9 +220,9 @@ namespace OneCore.CategorEyes.Business.Analysis
         }
 
         /// <summary>
-        /// Valida la solicitud de análisis para asegurar que el tipo de archivo sea soportado.
+        /// Validates the analysis request to ensure the file type is supported.
         /// </summary>
-        /// <param name="request">La solicitud de análisis a validar, de tipo <see cref="AnalysisRequest"/>.</param>
+        /// <param name="request">The analysis request to validate, of type <see cref="AnalysisRequest"/>.</param>
         private void ValidateRequest(AnalysisRequest request)
         {
             if (request.FileType == FileType.Unknown)
@@ -231,10 +230,10 @@ namespace OneCore.CategorEyes.Business.Analysis
         }
 
         /// <summary>
-        /// Sube el archivo proporcionado en la solicitud al servicio de almacenamiento en la nube y registra el evento.
+        /// Uploads the file provided in the request to the cloud storage service and logs the event.
         /// </summary>
-        /// <param name="request">La solicitud que contiene el archivo a subir, de tipo <see cref="AnalysisRequest"/>.</param>
-        /// <returns>Una tarea que representa la operación asincrónica y retorna el nombre del archivo subido, de tipo <see cref="string"/>.</returns>
+        /// <param name="request">The request containing the file to upload, of type <see cref="AnalysisRequest"/>.</param>
+        /// <returns>A task representing the asynchronous operation and returning the uploaded file's name, of type <see cref="string"/>.</returns>
         private async Task<string> UploadFileAndLog(AnalysisRequest request)
         {
             try
