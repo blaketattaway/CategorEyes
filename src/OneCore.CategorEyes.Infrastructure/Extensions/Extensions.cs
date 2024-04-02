@@ -5,47 +5,54 @@ namespace OneCore.CategorEyes.Infrastructure.Extensions
 {
     public static class Extensions
     {
-        public static IOrderedQueryable<T> OrderBy<T>(
-            this IQueryable<T> source,
-            string property)
+        public static IOrderedQueryable<T> OrderBy<T>(this IQueryable<T> source, string property)
         {
-            return ApplyOrder<T>(source, property, "OrderBy");
+            return ApplyOrder(source, property, nameof(Queryable.OrderBy));
         }
 
-        public static IOrderedQueryable<T> OrderByDescending<T>(
-            this IQueryable<T> source,
-            string property)
+        public static IOrderedQueryable<T> OrderByDescending<T>(this IQueryable<T> source, string property)
         {
-            return ApplyOrder<T>(source, property, "OrderByDescending");
+            return ApplyOrder(source, property, nameof(Queryable.OrderByDescending));
         }
 
-        static IOrderedQueryable<T> ApplyOrder<T>(
-            IQueryable<T> source,
-            string property,
-            string methodName)
+        private static IOrderedQueryable<T> ApplyOrder<T>(IQueryable<T> source, string property, string methodName)
         {
-            string[] props = property.Split('.');
-            Type type = typeof(T);
+            var (type, lambda) = CreateLambda<T>(property);
+            var method = FindQueryableMethod(methodName, typeof(T), type);
+            var result = InvokeQueryableMethod(source, lambda, method);
+            return (IOrderedQueryable<T>)result;
+        }
+
+        private static (Type, LambdaExpression) CreateLambda<T>(string property)
+        {
+            var props = property.Split('.');
+            var type = typeof(T);
             ParameterExpression arg = Expression.Parameter(type, "x");
             Expression expr = arg;
-            foreach (string prop in props)
+            foreach (var prop in props)
             {
-                // use reflection (not ComponentModel) to mirror LINQ
-                PropertyInfo pi = type.GetProperty(prop);
+                var pi = type.GetProperty(prop) ?? throw new ArgumentException($"Property '{prop}' not found on type '{type.Name}'.");
                 expr = Expression.Property(expr, pi);
                 type = pi.PropertyType;
             }
-            Type delegateType = typeof(Func<,>).MakeGenericType(typeof(T), type);
-            LambdaExpression lambda = Expression.Lambda(delegateType, expr, arg);
+            var delegateType = typeof(Func<,>).MakeGenericType(typeof(T), type);
+            var lambda = Expression.Lambda(delegateType, expr, arg);
+            return (type, lambda);
+        }
 
-            object result = typeof(Queryable).GetMethods().Single(
-                    method => method.Name == methodName
-                            && method.IsGenericMethodDefinition
-                            && method.GetGenericArguments().Length == 2
-                            && method.GetParameters().Length == 2)
-                    .MakeGenericMethod(typeof(T), type)
-                    .Invoke(null, new object[] { source, lambda });
-            return (IOrderedQueryable<T>)result;
+        private static MethodInfo FindQueryableMethod(string methodName, Type entityType, Type propertyType)
+        {
+            return typeof(Queryable).GetMethods().Single(
+                method => method.Name == methodName
+                        && method.IsGenericMethodDefinition
+                        && method.GetGenericArguments().Length == 2
+                        && method.GetParameters().Length == 2)
+                .MakeGenericMethod(entityType, propertyType);
+        }
+
+        private static object InvokeQueryableMethod<T>(IQueryable<T> source, LambdaExpression lambda, MethodInfo method)
+        {
+            return method.Invoke(null, new object[] { source, lambda });
         }
     }
 }
