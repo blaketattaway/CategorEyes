@@ -1,48 +1,37 @@
-﻿@inject IJSRuntime JsRuntime
-@inject NavigationManager NavigationManager
+﻿@inject CultureService CultureService
 @using System.Globalization
 
-<div style="position:absolute; right:0;">
-    <RadzenDropDown TValue="string" Value=@(GetCultureName(Culture)) Data=@cultureNames Change="@(args => Culture = new CultureInfo(cultures[$"{args}"]) )" Style="width: 100%; max-width: 400px;" Name="DropDownChangeEvent" />
+<div class="culture-selector">
+    <RadzenDropDown TValue="string" Value=@(CultureDisplayName) Data=@cultureNames Change="OnChangeCulture" Style="width: 100%; max-width: 400px;" />
 </div>
 
 @code {
-    List<string> cultureNames = new List<string> { Resource.English, Resource.Spanish };
-
-    Dictionary<string, string> cultures = new Dictionary<string, string>
+    private List<string> cultureNames = new List<string> { Resource.English, Resource.Spanish };
+    private Dictionary<string, string> cultures = new Dictionary<string, string>
     {
         { Resource.English, "en-US" },
         { Resource.Spanish, "es-MX" },
     };
 
-    CultureInfo Culture
-    {
-        get => CultureInfo.CurrentCulture;
-        set
-        {
-            if (CultureInfo.CurrentCulture != value)
-            {
-                var js = (IJSInProcessRuntime)JsRuntime;
-                js.InvokeVoid("blazorCulture.set", value.Name);
+    private string CultureDisplayName => GetCultureName(CultureInfo.CurrentCulture);
 
-                NavigationManager.NavigateTo(NavigationManager.Uri, forceLoad: true);
-            }
-        }
+    /// <summary>
+    /// Handles culture change events by setting the application's culture to the selected value and reloading the application.
+    /// </summary>
+    /// <param name="cultureName">The name of the selected culture, of type <see cref="object"/>. Expected to be a key from the <c>cultures</c> dictionary.</param>
+    private void OnChangeCulture(object cultureName)
+    {
+        CultureInfo newCulture = new CultureInfo(cultures[$"{cultureName}"]);
+        CultureService.SetCulture(newCulture);
     }
 
+    /// <summary>
+    /// Gets the display name of the current culture.
+    /// </summary>
+    /// <param name="culture">The current culture info, of type <see cref="CultureInfo"/>.</param>
+    /// <returns>The display name of the current culture, of type <see cref="string"/>.</returns>
     private string GetCultureName(CultureInfo culture)
     {
-        if (culture.Name == "en-US")
-        {
-            return Resource.English;
-        }
-        else if (culture.Name == "es-MX")
-        {
-            return Resource.Spanish;
-        }
-        else
-        {
-            return Resource.English;
-        }
+        return cultures.FirstOrDefault(x => x.Value == culture.Name).Key ?? Resource.English;
     }
 }

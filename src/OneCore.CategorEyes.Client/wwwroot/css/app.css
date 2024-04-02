@@ -1,5 +1,10 @@
 ﻿@import url('open-iconic/font/css/open-iconic-bootstrap.min.css');
 
+.culture-selector {
+    position: absolute;
+    right: 0;
+}
+
 .dropzone {
     border: 3px dashed #bb86fc;
     padding: 3rem;

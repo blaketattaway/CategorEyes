@@ -3,7 +3,7 @@
 @inject NotificationService NotificationService
 <div class="row">
     <div class="col-12 p-0">
-        <div class="dropzone @dropClass rounded">
+        <div class="dropzone @DropClass rounded">
             <BlazorInputFile.InputFile id="fileInput" multiple title=""
                                        OnChange="HandleFileInputChange"
                                        accept="@AcceptedFileTypes"
@@ -15,100 +15,100 @@
 </div>
 
 @code {
+    private const int MaxFileSizeMB = 5;
+    const int MaxFileSize = MaxFileSizeMB * 1024 * 1024; // 5MB
+    private string dropClass = string.Empty;
+    private List<IFileListEntry> selectedFiles = new List<IFileListEntry>();
 
+    /// <summary>
+    /// Gets or sets the accepted file types for the input. Defaults to accepting all file types.
+    /// </summary>
     [Parameter]
-    public string AcceptedFileTypes { get; set; }
+    public string AcceptedFileTypes { get; set; } = "*/*";
 
+    /// <summary>
+    /// Gets or sets the error notification message displayed when an invalid file is selected. Defaults to an empty string.
+    /// </summary>
     [Parameter]
-    public string ErrorNotification { get; set; }
+    public string ErrorNotification { get; set; } = string.Empty;
 
+    /// <summary>
+    /// Gets or sets the maximum number of files that can be selected. Defaults to 1.
+    /// </summary>
     [Parameter]
-    public int? MaxFiles { get; set; }
+    public int MaxFiles { get; set; } = 1;
 
+    /// <summary>
+    /// Gets or sets the help text displayed in the drop zone. Defaults to a generic drag-and-drop message.
+    /// </summary>
     [Parameter]
-    public string HelpText { get; set; }
+    public string HelpText { get; set; } = Resource.GenericDragNDropMessage;
 
+    /// <summary>
+    /// Gets or sets the callback event that is triggered when files are selected.
+    /// </summary>
     [Parameter]
     public EventCallback<List<IFileListEntry>> OnFileSelect { get; set; }
 
-    public DropZone()
-    {
-        if (AcceptedFileTypes is null)
-        {
-            AcceptedFileTypes = "*/*";
-        }
+    private string DropClass => dropClass;
 
-        if (ErrorNotification is null)
-        {
-            ErrorNotification = string.Empty;
-        }
+    /// <summary>
+    /// Handles the drag enter event by applying a CSS class to indicate an active drag state.
+    /// </summary>
+    private void HandleDragEnter() => dropClass = "dropzone-drag";
 
-        if (MaxFiles is null || MaxFiles < 1)
-        {
-            MaxFiles = 1;
-        }
+    /// <summary>
+    /// Handles the drag leave event by removing the CSS class that indicates an active drag state.
+    /// </summary>
+    private void HandleDragLeave() => dropClass = string.Empty;
 
-        if (HelpText is null)
-        {
-            HelpText = Resource.GenericDragNDropMessage;
-        }
-    }
-
-    const int MaxFileSizeMB = 5;
-    const int MaxFileSize = MaxFileSizeMB * 1024 * 1024; // 5MB
-    private string dropClass = "";
-    private List<IFileListEntry> selectedFiles = new List<IFileListEntry>();
-
-    private void HandleDragEnter()
-    {
-        dropClass = "dropzone-drag";
-    }
-
-    private void HandleDragLeave()
-    {
-        dropClass = "";
-    }
-
+    /// <summary>
+    /// Handles file input changes by validating the selected files and invoking the OnFileSelect event for valid files.
+    /// </summary>
+    /// <param name="files">The selected files, of type <see cref="IFileListEntry[]"/>.</param>
     private async void HandleFileInputChange(IFileListEntry[] files)
     {
         if (files.Length > MaxFiles)
         {
-            NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Error", Detail = Resource.MaxNumberOfFilesSurpassed });
+            NotifyMaxFilesExceeded();
             return;
         }
 
-        dropClass = "";
-        List<string> acceptedFileTypes = AcceptedFileTypes.Split(',').ToList();
-        if (files != null)
+        dropClass = string.Empty;
+
+        foreach (var file in files.Take(MaxFiles))
         {
-            foreach (var file in files)
+            if (IsValidFile(file))
             {
-                bool error = file.Size > MaxFileSize || !acceptedFileTypes.Contains(file.Type);
-
-                //keep the good files
-                if (!error)
-                {
-                    selectedFiles.Add(file);
-                }
-                else
-                {
-                    NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Error", Detail = ErrorNotification });
-                }
-
-                if (selectedFiles.Count == MaxFiles) break;
+                selectedFiles.Add(file);
             }
-
-            if (selectedFiles.Count != 0)
+            else
             {
-                await OnFileSelect.InvokeAsync(selectedFiles);
+                NotifyError();
             }
-
-            RemoveFiles();
         }
-    }
 
-    private void RemoveFiles()
-    {
-        selectedFiles = new List<IFileListEntry>();
-    }
+        if (selectedFiles.Any())
+        {
+            await OnFileSelect.InvokeAsync(selectedFiles);
+            selectedFiles.Clear();
+        }
+     }
+
+    /// <summary>
+    /// Validates a file based on its size and type.
+    /// </summary>
+    /// <param name="file">The file to validate, of type <see cref="IFileListEntry"/>.</param>
+    /// <returns><c>true</c> if the file is valid; otherwise, <c>false</c>.</returns>
+    private bool IsValidFile(IFileListEntry file) => file.Size <= MaxFileSize && AcceptedFileTypes.Split(',').Contains(file.Type);
+
+    /// <summary>
+    /// Notifies the user when the maximum number of files has been exceeded.
+    /// </summary>
+    private void NotifyMaxFilesExceeded() => NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = nameof(NotificationSeverity.Error), Detail = Resource.MaxNumberOfFilesSurpassed });
+
+    /// <summary>
+    /// Notifies the user of an error when a file does not meet the validation criteria.
+    /// </summary>
+    private void NotifyError() => NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = nameof(NotificationSeverity.Error), Detail = ErrorNotification });
 }
