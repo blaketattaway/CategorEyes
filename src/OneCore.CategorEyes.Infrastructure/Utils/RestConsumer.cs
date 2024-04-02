@@ -43,7 +43,7 @@ namespace OneCore.CategorEyes.Infrastructure.Utils
         private static HttpContent CreateHttpContent<T>(T content)
         {
             var json = JsonConvert.SerializeObject(content);
-            return new StringContent(json, Encoding.UTF8, "application/json");
+            return new StringContent(json, Encoding.UTF8, ContentType.APPLICATION_JSON);
         }
     }
 }
