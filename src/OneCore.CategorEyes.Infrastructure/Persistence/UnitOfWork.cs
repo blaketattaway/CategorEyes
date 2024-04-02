@@ -12,6 +12,10 @@ namespace OneCore.CategorEyes.Infrastructure.Persistence
         private Hashtable _repositories;
         private readonly CategorEyesDbContext _context;
 
+        /// <summary>
+        /// Initializes a new instance of the UnitOfWork class with a specific database context.
+        /// </summary>
+        /// <param name="context">The database context of type <see cref="CategorEyesDbContext"/> used to interact with the database.</param>
         public UnitOfWork(CategorEyesDbContext context)
         {
             _context = context;
@@ -55,12 +59,19 @@ namespace OneCore.CategorEyes.Infrastructure.Persistence
             return (IAsyncRepository<T>)_repositories[type];
         }
 
+        /// <summary>
+        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+        /// </summary>
         public void Dispose()
         {
             Dispose(true);
             GC.SuppressFinalize(this);
         }
 
+        /// <summary>
+        /// Releases unmanaged resources used by the UnitOfWork and optionally releases managed resources.
+        /// </summary>
+        /// <param name="disposing">True to release both managed and unmanaged resources; false to release only unmanaged resources.</param>
         public virtual void Dispose(bool disposing)
         {
             if (disposing)
@@ -69,6 +80,9 @@ namespace OneCore.CategorEyes.Infrastructure.Persistence
             }
         }
 
+        /// <summary>
+        /// The destructor for the UnitOfWork class that calls Dispose, ensuring all resources are freed.
+        /// </summary>
         ~UnitOfWork()
         {
             Dispose(false);

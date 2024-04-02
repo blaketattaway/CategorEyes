@@ -136,6 +136,9 @@ namespace OneCore.CategorEyes.Business.Analysis
                 processed.Append(text);
             }
 
+            if (string.IsNullOrEmpty(processed.ToString()))
+                throw new Exception("There's no text to send");
+
             return processed.ToString();
         }
 

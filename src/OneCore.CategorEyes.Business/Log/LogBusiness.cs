@@ -8,7 +8,6 @@ namespace OneCore.CategorEyes.Business.Log
     internal class LogBusiness : ILogBusiness
     {
         private readonly IUnitOfWork _unitOfWork;
-        private const int MIN_FILTER_LENGTH = 4;
 
         public LogBusiness(IUnitOfWork unitOfWork)
         {
