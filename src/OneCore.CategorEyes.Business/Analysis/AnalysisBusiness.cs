@@ -35,11 +35,6 @@ namespace OneCore.CategorEyes.Business.Analysis
             _logger = logger;
         }
 
-        /// <summary>
-        /// Analiza el documento proporcionado en la solicitud utilizando el servicio de OpenAI y registra los resultados.
-        /// </summary>
-        /// <param name="request">La solicitud de análisis, de tipo <see cref="AnalysisRequest"/>.</param>
-        /// <returns>Una tarea que representa la operación asincrónica y retorna una <see cref="AnalysisResponse"/> con los resultados del análisis.</returns>
         public async Task<AnalysisResponse> Analyze(AnalysisRequest request)
         {
             try

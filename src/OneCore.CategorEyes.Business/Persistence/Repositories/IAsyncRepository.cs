@@ -6,6 +6,9 @@ namespace OneCore.CategorEyes.Business.Persistence.Repositories
 {
     public interface IAsyncRepository<T> where T : BaseEntity
     {
+        Task<IReadOnlyList<T>> GetAllAsync(Expression<Func<T, bool>>? predicate = null,
+            SortDescriptor? sortDescriptor = null);
+
         Task<(IReadOnlyList<T>, int)> GetPagedAsync(int skip, int take, Expression<Func<T, bool>>? predicate = null,
             SortDescriptor? sortDescriptor = null,
             bool disableTracking = true);

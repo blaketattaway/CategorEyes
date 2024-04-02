@@ -18,6 +18,29 @@ namespace OneCore.CategorEyes.Infrastructure.Persistence.Repositories
             _dbContext = dbContext;
         }
 
+        public async Task<IReadOnlyList<T>> GetAllAsync(Expression<Func<T, bool>>? predicate = null,
+            SortDescriptor? sortDescriptor = null)
+        {
+            IQueryable<T> query = _dbContext.Set<T>();
+
+            query = query.AsNoTracking();
+
+            if (predicate is not null) query = query.Where(predicate);
+
+            if (sortDescriptor is not null)
+            {
+                switch (sortDescriptor.SortOrder)
+                {
+                    case SortOrder.Ascending:
+                        return await query.OrderBy(sortDescriptor.Property).ToListAsync();
+                    case SortOrder.Descending:
+                        return await query.OrderByDescending(sortDescriptor.Property).ToListAsync();
+                }
+            }
+
+            return await query.ToListAsync();
+        }
+
         public async Task AddAsync(T entity)
         {
             await _dbContext.Set<T>().AddAsync(entity);
