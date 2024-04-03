@@ -15,7 +15,7 @@ using static OneCore.CategorEyes.Commons.Consts.OpenAI;
 
 namespace OneCore.CategorEyes.Business.Analysis
 {
-    internal class AnalysisBusiness : IAnalysisBusiness
+    public class AnalysisBusiness : IAnalysisBusiness
     {
         private const string DATA = "data:";
         private const string BASE64 = ";base64,";

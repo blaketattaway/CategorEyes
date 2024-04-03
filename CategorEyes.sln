@@ -17,6 +17,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{F4FD867F
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OneCore.CategorEyes.Infrastructure", "src\OneCore.CategorEyes.Infrastructure\OneCore.CategorEyes.Infrastructure.csproj", "{EBC11883-4233-4D3E-8112-DFD92EE712DD}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OneCore.CategorEyes.Tests", "tests\OneCore.CategorEyes.Tests\OneCore.CategorEyes.Tests.csproj", "{0DE715BA-8001-41AF-96E4-ABF9042EB905}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -43,6 +45,10 @@ Global
 		{EBC11883-4233-4D3E-8112-DFD92EE712DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EBC11883-4233-4D3E-8112-DFD92EE712DD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EBC11883-4233-4D3E-8112-DFD92EE712DD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0DE715BA-8001-41AF-96E4-ABF9042EB905}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0DE715BA-8001-41AF-96E4-ABF9042EB905}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0DE715BA-8001-41AF-96E4-ABF9042EB905}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0DE715BA-8001-41AF-96E4-ABF9042EB905}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -53,6 +59,7 @@ Global
 		{905FEF1F-D627-45C6-BBE6-DDB423A51045} = {77CC9779-737E-4C4C-B053-788118584FB6}
 		{4BBB4356-E8DE-4EC5-9FA5-10DACC8337BE} = {77CC9779-737E-4C4C-B053-788118584FB6}
 		{EBC11883-4233-4D3E-8112-DFD92EE712DD} = {77CC9779-737E-4C4C-B053-788118584FB6}
+		{0DE715BA-8001-41AF-96E4-ABF9042EB905} = {F4FD867F-40A1-490A-BB2F-37B796E228BE}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {E6DEA33B-AB6C-419D-BB40-9B4B6D0E7C20}
