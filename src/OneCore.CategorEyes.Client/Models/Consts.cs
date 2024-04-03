@@ -48,6 +48,7 @@ namespace OneCore.CategorEyes.Client.Models
         {
             public const string ANALYSIS = "Analysis/Analyze";
             public const string GET_LOGS = "Log/GetLogs";
+            public const string GENERATE_REPORT = "Report/Generate";
         }
     }
 }

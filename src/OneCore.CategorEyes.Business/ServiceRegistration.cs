@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using OneCore.CategorEyes.Business.Analysis;
 using OneCore.CategorEyes.Business.Log;
+using OneCore.CategorEyes.Business.Report;
 
 namespace OneCore.CategorEyes.Business
 {
@@ -10,6 +11,7 @@ namespace OneCore.CategorEyes.Business
         {
             services.AddScoped<IAnalysisBusiness, AnalysisBusiness>();
             services.AddScoped<ILogBusiness, LogBusiness>();
+            services.AddScoped<IReportBusiness, ReportBusiness>();
             return services;
         }
     }

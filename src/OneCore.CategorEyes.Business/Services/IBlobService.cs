@@ -9,6 +9,6 @@ namespace OneCore.CategorEyes.Business.Services
         /// </summary>
         /// <param name="fileUpload">An instance of <see cref="FileUpload"/> containing the base64-encoded file content, the content type, and the file extension, of type <see cref="FileUpload"/>.</param>
         /// <returns>A task representing the asynchronous operation, returning the unique file name of the uploaded blob as a <see cref="string"/>.</returns>
-        Task<string> UploadFile(FileUpload fileUpload);
+        Task<string> UploadFile(FileUpload fileUpload, bool isReport = false);
     }
 }

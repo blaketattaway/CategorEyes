@@ -1,4 +1,5 @@
 ﻿using OneCore.CategorEyes.Business.Persistence;
+using OneCore.CategorEyes.Commons.Consts;
 using OneCore.CategorEyes.Commons.Entities;
 using OneCore.CategorEyes.Commons.Requests;
 using OneCore.CategorEyes.Commons.Responses;
@@ -28,5 +29,23 @@ namespace OneCore.CategorEyes.Business.Log
                 TotalPages = totalPages
             };
         }
+
+        public async Task AddUserInteraction(UserInteractionRequest request)
+        {
+            Historical historical = new ()
+            {
+                HistoricalType = (int)HistoricalType.UserInteraction,
+                CreationDate = DateTime.Now,
+                Description = ((UserActions)request.UserInteractionType).GetDescription()
+            };
+
+            await _unitOfWork.HistoricalRepository.AddAsync(historical);
+            await _unitOfWork.CompleteAsync();
+        }
+
+        public async Task<IEnumerable<Historical>> GetAll(LogRequest request)
+        {
+            return await _unitOfWork.HistoricalRepository.GetAllAsync(sortDescriptor: request.Sort);
+        }   
     }
 }

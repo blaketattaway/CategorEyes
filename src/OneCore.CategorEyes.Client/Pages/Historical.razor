@@ -67,6 +67,7 @@
     const int TAKE = 10;
     const string HISTORICAL_TYPE_PROP_NAME = "HistoricalType";
     const string HISTORICAL_TYPE_ENUM_PROP_NAME = "HistoricalTypeEnum";
+    ReportRequest currentRequest;
 
     async Task LoadData(LoadDataArgs loadDataArgs)
     {
@@ -74,12 +75,18 @@
 
         try
         {
+            currentRequest = new ReportRequest
+            {
+                Sort = GetSort(loadDataArgs),
+                Headers = new List<string> { "Id", Resource.Type, Resource.DateOfCreation, "URL", Resource.Description },
+            };
+
             var logsResponse = await new RestConsumer(BaseAPI.CategorEyes).PostResponse<LogResponse, LogRequest>(Endpoints.GET_LOGS, new LogRequest
-                {
-                    Skip = loadDataArgs.Skip ?? SKIP,
-                    Take = loadDataArgs.Top ?? TAKE,
-                    Sort = GetSort(loadDataArgs)
-                });
+            {
+                Skip = loadDataArgs.Skip ?? SKIP,
+                Take = loadDataArgs.Top ?? TAKE,
+                Sort = GetSort(loadDataArgs)
+            });
 
             foreach (var historical in logsResponse.Historicals)
             {
@@ -128,7 +135,15 @@
 
     private async Task ExporToExcel()
     {
-
+        try
+        {
+            var reportResponse = await new RestConsumer(BaseAPI.CategorEyes).PostResponse<ReportResponse, ReportRequest>(Endpoints.GENERATE_REPORT, currentRequest);
+            await JSRuntime.InvokeVoidAsync("open", reportResponse.Url);
+        }
+        catch (Exception ex)
+        {
+            NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Error", Detail = Resource.AnErrorOcurred });
+        }
     }
 
     async Task ShowGeneralDataDialog(GeneralText? generalText, string additionalData)

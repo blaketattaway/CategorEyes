@@ -8,13 +8,15 @@ using OneCore.CategorEyes.Commons.Consts;
 
 namespace OneCore.CategorEyes.Infrastructure.Services
 {
-    internal class BlobService : IBlobService
+    internal sealed class BlobService : IBlobService
     {
         private readonly BlobContainerClient _blobContainerClient;
         private readonly ILogger<BlobService> _logger;
+        private readonly BlobContainerClient _reportBlobContainerClient;
 
         private static readonly string BlobStorageKeyName = Blob.BLOB_STORAGE_KEY_NAME;
-        private static readonly string ContainerName = Blob.CONTAINER_NAME;
+        private static readonly string ContainerName = Blob.CONTAINER_NAME_KEY;
+        private static readonly string ReportContainerName = Blob.REPORT_CONTAINER_NAME_KEY;
 
         /// <summary>
         /// Initializes a new instance of the BlobService class using the provided application configuration and logger.
@@ -23,18 +25,19 @@ namespace OneCore.CategorEyes.Infrastructure.Services
         /// <param name="logger">The logger for capturing runtime information and errors, provided via <see cref="ILogger{BlobService}"/>.</param>
         public BlobService(IConfiguration configuration, ILogger<BlobService> logger)
         {
-            _blobContainerClient = InitializeBlobContainerClient(configuration);
+            _blobContainerClient = InitializeBlobContainerClient(configuration, ContainerName);
+            _reportBlobContainerClient = InitializeBlobContainerClient(configuration, ReportContainerName);
             _logger = logger;
         }
 
-        public async Task<string> UploadFile(FileUpload fileUpload)
+        public async Task<string> UploadFile(FileUpload fileUpload, bool isReport = false)
         {
             try
             {
                 string fileName = GenerateFileName(fileUpload.Extension);
                 await using var fileToUploadStream = ConvertBase64ToFileStream(fileUpload.Base64File);
 
-                var blobClient = _blobContainerClient.GetBlobClient(fileName);
+                var blobClient = isReport ? _reportBlobContainerClient.GetBlobClient(fileName) : _blobContainerClient.GetBlobClient(fileName);
                 var options = new BlobUploadOptions
                 {
                     HttpHeaders = new BlobHttpHeaders { ContentType = fileUpload.ContentType }
@@ -55,10 +58,10 @@ namespace OneCore.CategorEyes.Infrastructure.Services
         /// </summary>
         /// <param name="configuration">The application configuration from which to retrieve the blob storage connection string and container name, of type <see cref="IConfiguration"/>.</param>
         /// <returns>A <see cref="BlobContainerClient"/> for interacting with the specified Azure Blob Storage container.</returns>
-        private BlobContainerClient InitializeBlobContainerClient(IConfiguration configuration)
+        private BlobContainerClient InitializeBlobContainerClient(IConfiguration configuration, string containerKey)
         {
             var connectionString = configuration[BlobStorageKeyName];
-            var containerName = configuration[ContainerName];
+            var containerName = configuration[containerKey];
             return new BlobContainerClient(connectionString, containerName);
         }
 
