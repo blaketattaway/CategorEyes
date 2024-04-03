@@ -181,4 +181,7 @@
   <data name="MaxNumberOfFilesSurpassed" xml:space="preserve">
     <value>Max number of files per upload surpassed</value>
   </data>
+  <data name="UnrecognizedDocumentType" xml:space="preserve">
+    <value>Unrecognized document type</value>
+  </data>
 </root>

@@ -3,6 +3,7 @@
 @inject NotificationService NotificationService
 @inject DialogService DialogService
 @inject IJSRuntime JSRuntime
+@inject RestConsumer RestConsumer
 @page "/historical"
 
 <RadzenButton Text="Reset" Click="@Reset" Style="margin-bottom: 20px;" />
@@ -81,7 +82,7 @@
                 Headers = new List<string> { "Id", Resource.Type, Resource.DateOfCreation, "URL", Resource.Description },
             };
 
-            var logsResponse = await new RestConsumer(BaseAPI.CategorEyes).PostResponse<LogResponse, LogRequest>(Endpoints.GET_LOGS, new LogRequest
+            var logsResponse = await RestConsumer.PostResponse<LogResponse, LogRequest>(Endpoints.GET_LOGS, new LogRequest
             {
                 Skip = loadDataArgs.Skip ?? SKIP,
                 Take = loadDataArgs.Top ?? TAKE,
@@ -137,10 +138,10 @@
     {
         try
         {
-            var reportResponse = await new RestConsumer(BaseAPI.CategorEyes).PostResponse<ReportResponse, ReportRequest>(Endpoints.GENERATE_REPORT, currentRequest);
+            var reportResponse = await RestConsumer.PostResponse<ReportResponse, ReportRequest>(Endpoints.GENERATE_REPORT, currentRequest);
             await JSRuntime.InvokeVoidAsync("open", reportResponse.Url);
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Error", Detail = Resource.AnErrorOcurred });
         }

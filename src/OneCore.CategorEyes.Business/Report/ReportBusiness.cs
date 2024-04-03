@@ -42,33 +42,23 @@ namespace OneCore.CategorEyes.Business.Report
 
         private async Task<byte[]> GenerateExcel(ReportRequest request)
         {
-            try
+            using ExcelPackage excelPackage = new();
+
+            var historicals = await _logBusiness.GetAll(new LogRequest
             {
+                Sort = request.Sort,
+                Filter = request.Filter,
+            });
 
-                IEnumerable<Historical> historicals = await _logBusiness.GetAll(new LogRequest
-                {
-                    Sort = request.Sort,
-                    Filter = request.Filter,
-                });
+            ExcelWorksheet worksheet = excelPackage.Workbook.Worksheets.Add("Historicals");
 
-                using ExcelPackage excelPackage = new();
+            AddHeaders(request.Headers, worksheet);
+            AddData(historicals, worksheet);
 
-                ExcelWorksheet worksheet = excelPackage.Workbook.Worksheets.Add("Historicals");
-
-                AddHeaders(request.Headers, ref worksheet);
-
-                AddData(historicals, ref worksheet);
-
-                return excelPackage.GetAsByteArray();
-            }
-            catch (Exception ex)
-            {
-
-                throw;
-            }
+            return excelPackage.GetAsByteArray();
         }
 
-        private static void AddHeaders(List<string> headers, ref ExcelWorksheet worksheet)
+        private static void AddHeaders(List<string> headers, ExcelWorksheet worksheet)
         {
             int row = 1;
             int column = 1;
@@ -81,7 +71,7 @@ namespace OneCore.CategorEyes.Business.Report
             worksheet.Cells[1, 1, 1, column].Style.Font.Bold = true;
         }
 
-        private void AddData(IEnumerable<Historical> historicals, ref ExcelWorksheet worksheet)
+        private void AddData(IEnumerable<Historical> historicals, ExcelWorksheet worksheet)
         {
             int row = 2;
             int column = 1;
@@ -120,8 +110,13 @@ namespace OneCore.CategorEyes.Business.Report
                 row++;
             }
 
-            worksheet.Cells[1, 1, historicals.Count() + 1, column - 1].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
-            worksheet.Cells[1, 1, historicals.Count() + 1, column - 1].AutoFitColumns();
+            StyleWorksheet(worksheet, historicals.Count() + 1, column - 1);
+        }
+
+        private void StyleWorksheet(ExcelWorksheet worksheet, int rowCount, int columnCount)
+        {
+            worksheet.Cells[1, 1, rowCount, columnCount].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+            worksheet.Cells[1, 1, rowCount, columnCount].AutoFitColumns();
         }
     }
 }

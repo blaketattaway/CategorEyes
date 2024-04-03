@@ -6,29 +6,30 @@ namespace OneCore.CategorEyes.Client.Extensions
 {
     public static class WebAssemblyHostExtension
     {
+        private const string DEFAULT_CULTURE = "en-US";
+
         public async static Task SetDefaultCulture(this WebAssemblyHost host)
         {
             var jsInterop = host.Services.GetRequiredService<IJSRuntime>();
-            string? result;
 
-            try
-            {
-                result = await jsInterop.InvokeAsync<string>("blazorCulture.get");
-            }
-            catch (Exception)
-            {
-                result = null;
-            }
+            var result = await SafeInvokeAsync(jsInterop, "blazorCulture.get", DEFAULT_CULTURE);
 
-            CultureInfo culture;
-
-            if (result != null)
-                culture = new CultureInfo(result);
-            else
-                culture = new CultureInfo("en-US");
+            var culture = new CultureInfo(result);
 
             CultureInfo.DefaultThreadCurrentCulture = culture;
             CultureInfo.DefaultThreadCurrentUICulture = culture;
+        }
+
+        private static async Task<string> SafeInvokeAsync(IJSRuntime jsInterop, string method, string defaultValue)
+        {
+            try
+            {
+                return await jsInterop.InvokeAsync<string>(method) ?? defaultValue;
+            }
+            catch
+            {
+                return defaultValue;
+            }
         }
     }
 }

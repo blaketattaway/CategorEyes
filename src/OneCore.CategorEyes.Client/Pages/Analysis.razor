@@ -3,6 +3,7 @@
 @using System.Text.Json;
 @inject DialogService DialogService
 @inject NotificationService NotificationService
+@inject RestConsumer RestConsumer
 @page "/"
 
 <div class="container">
@@ -20,39 +21,28 @@
     const string ACCEPTED_FILE_TYPES = "image/png,image/jpeg,application/pdf";
     const string PDF_FILE_TYPE = "application/pdf";
     const string IMAGE_FILE_TYPE = "image";
+    private bool isLoading = true;
 
     private async Task SendToAnalyze(List<IFileListEntry> files)
     {
         try
         {
             var file = files.FirstOrDefault();
-            var ms = await file.ReadAllAsync(MAX_FILE_SIZE);
-            var fileBytes = ms.ToArray();
-            string base64 = Convert.ToBase64String(fileBytes);
+            if (file == null) return;
+
+            var base64 = await ReadFileAsBase64(file);
 
             var request = new AnalysisRequest
-                    {
-                        Base64File = base64,
-                        FileTypeName = file!.Type,
-                        FileType = GetFileType(file.Type)
-                    };
-
-            var analysisResponse = await new RestConsumer(BaseAPI.CategorEyes).PostResponse<AnalysisResponse, AnalysisRequest>(Endpoints.ANALYSIS, request);
-
-            switch (analysisResponse?.DocumentType)
             {
-                case DocumentType.Invoice:
-                    var invoiceData = JsonSerializer.Deserialize<Invoice>(analysisResponse.Data);
-                    await ShowInvoiceDialog(invoiceData, analysisResponse.AdditionalData);
-                    break;
-                case DocumentType.GeneralText:
-                    var generalTextData = JsonSerializer.Deserialize<GeneralText>(analysisResponse.Data);
-                    await ShowGeneralDataDialog(generalTextData, analysisResponse.AdditionalData);
-                    break;
-                case DocumentType.Other:
-                    await ShowOtherDialog(analysisResponse.AdditionalData);
-                    break;
-            }
+                Base64File = base64,
+                FileTypeName = file.Type,
+                FileType = GetFileType(file.Type)
+            };
+
+            isLoading = true;
+            var analysisResponse = await RestConsumer.PostResponse<AnalysisResponse, AnalysisRequest>(Endpoints.ANALYSIS, request);
+            isLoading = false;
+            await HandleAnalysisResponse(analysisResponse);
         }
         catch (Exception)
         {
@@ -60,17 +50,41 @@
         }
     }
 
+    private async Task<string> ReadFileAsBase64(IFileListEntry file)
+    {
+        using var ms = await file.ReadAllAsync(MAX_FILE_SIZE);
+        return Convert.ToBase64String(ms.ToArray());
+    }
+
     private FileType GetFileType(string fileType)
     {
-        if (fileType == PDF_FILE_TYPE)
+        return fileType switch
         {
-            return FileType.Pdf;
-        }
-        else if (fileType.Contains(IMAGE_FILE_TYPE))
+            PDF_FILE_TYPE => FileType.Pdf,
+            _ when fileType.Contains(IMAGE_FILE_TYPE) => FileType.Image,
+            _ => FileType.Unknown
+        };
+    }
+
+    private async Task HandleAnalysisResponse(AnalysisResponse analysisResponse)
+    {
+        switch (analysisResponse?.DocumentType)
         {
-            return FileType.Image;
+            case DocumentType.Invoice:
+                var invoiceData = JsonSerializer.Deserialize<Invoice>(analysisResponse.Data);
+                await ShowInvoiceDialog(invoiceData, analysisResponse.AdditionalData);
+                break;
+            case DocumentType.GeneralText:
+                var generalTextData = JsonSerializer.Deserialize<GeneralText>(analysisResponse.Data);
+                await ShowGeneralDataDialog(generalTextData, analysisResponse.AdditionalData);
+                break;
+            case DocumentType.Other:
+                await ShowOtherDialog(analysisResponse.AdditionalData);
+                break;
+            default:
+                NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Warning, Summary = "Warning", Detail = Resource.UnrecognizedDocumentType });
+                break;
         }
-        return FileType.Unknown;
     }
 
     async Task ShowGeneralDataDialog(GeneralText? generalText, string additionalData)

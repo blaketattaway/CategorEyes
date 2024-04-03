@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using OneCore.CategorEyes.Client;
 using OneCore.CategorEyes.Client.Extensions;
 using OneCore.CategorEyes.Client.Services;
+using OneCore.CategorEyes.Client.Utils;
 using Radzen;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
@@ -13,6 +14,7 @@ builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.
 builder.Services.AddRadzenComponents();
 builder.Services.AddLocalization();
 builder.Services.AddScoped<CultureService>();
+builder.Services.AddScoped<RestConsumer>();
 
 var host = builder.Build();
 

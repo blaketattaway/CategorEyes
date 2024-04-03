@@ -311,5 +311,14 @@ namespace OneCore.CategorEyes.Client.Shared.ResourceFiles {
                 return ResourceManager.GetString("Type", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unrecognized document type.
+        /// </summary>
+        public static string UnrecognizedDocumentType {
+            get {
+                return ResourceManager.GetString("UnrecognizedDocumentType", resourceCulture);
+            }
+        }
     }
 }

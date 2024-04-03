@@ -35,7 +35,6 @@ namespace OneCore.CategorEyes.Client.Models
 
         public static class URLs
         {
-            public const string CATEGOREYES_API = "https://localhost:7112/api/";
             public const string BLOB_STORAGE_URL = "https://categoreyes.blob.core.windows.net/uploads/";
         }
 
@@ -46,9 +45,9 @@ namespace OneCore.CategorEyes.Client.Models
 
         public static class Endpoints
         {
-            public const string ANALYSIS = "Analysis/Analyze";
-            public const string GET_LOGS = "Log/GetLogs";
-            public const string GENERATE_REPORT = "Report/Generate";
+            public const string ANALYSIS = "https://localhost:7112/api/Analysis/Analyze";
+            public const string GET_LOGS = "https://localhost:7112/api/Log/GetLogs";
+            public const string GENERATE_REPORT = "https://localhost:7112/api/Report/Generate";
         }
     }
 }

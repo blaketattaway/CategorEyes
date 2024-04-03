@@ -181,4 +181,7 @@
   <data name="MaxNumberOfFilesSurpassed" xml:space="preserve">
     <value>Ha sobrepasado el máximo de archivos por carga</value>
   </data>
+  <data name="UnrecognizedDocumentType" xml:space="preserve">
+    <value>Tipo de archivo no reconocido</value>
+  </data>
 </root>
