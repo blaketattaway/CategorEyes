@@ -45,7 +45,9 @@ namespace OneCore.CategorEyes.Business.Log
 
         public async Task<IEnumerable<Historical>> GetAll(LogRequest request)
         {
-            return await _unitOfWork.HistoricalRepository.GetAllAsync(sortDescriptor: request.Sort);
+            return !string.IsNullOrEmpty(request.Filter?.Trim()) ?
+                await _unitOfWork.HistoricalRepository.GetAllAsync(x => x.Description.Contains(request.Filter!), request.Sort):
+                await _unitOfWork.HistoricalRepository.GetAllAsync(sortDescriptor: request.Sort);
         }   
     }
 }
