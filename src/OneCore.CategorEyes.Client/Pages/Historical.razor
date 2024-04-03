@@ -4,6 +4,7 @@
 @inject DialogService DialogService
 @inject IJSRuntime JSRuntime
 @inject RestConsumer RestConsumer
+@inject LoadingService LoadingService
 @page "/historical"
 
 <RadzenButton Text="Reset" Click="@Reset" Style="margin-bottom: 20px;" />
@@ -138,11 +139,14 @@
     {
         try
         {
+            LoadingService.StartLoading();
             var reportResponse = await RestConsumer.PostResponse<ReportResponse, ReportRequest>(Endpoints.GENERATE_REPORT, currentRequest);
+            LoadingService.StopLoading();
             await JSRuntime.InvokeVoidAsync("open", reportResponse.Url);
         }
         catch (Exception)
         {
+            if (LoadingService.IsLoading) LoadingService.StopLoading();
             NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Error", Detail = Resource.AnErrorOcurred });
         }
     }

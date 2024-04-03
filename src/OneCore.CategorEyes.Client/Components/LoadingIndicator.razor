@@ -1,0 +1,29 @@
+﻿@implements IDisposable
+@inject LoadingService LoadingService
+
+@if (isLoading)
+{
+    <div class="loading-overlay">
+        <div class="loading-spinner"></div>
+    </div>
+}
+
+@code {
+    private bool isLoading;
+
+    protected override void OnInitialized()
+    {
+        LoadingService.OnLoadingChanged += HandleLoadingChanged;
+    }
+
+    private void HandleLoadingChanged(bool loading)
+    {
+        isLoading = loading;
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        LoadingService.OnLoadingChanged -= HandleLoadingChanged;
+    }
+}

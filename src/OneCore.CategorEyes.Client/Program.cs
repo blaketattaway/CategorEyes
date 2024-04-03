@@ -15,6 +15,7 @@ builder.Services.AddRadzenComponents();
 builder.Services.AddLocalization();
 builder.Services.AddScoped<CultureService>();
 builder.Services.AddScoped<RestConsumer>();
+builder.Services.AddScoped<LoadingService>();
 
 var host = builder.Build();
 

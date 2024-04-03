@@ -4,6 +4,7 @@
 @inject DialogService DialogService
 @inject NotificationService NotificationService
 @inject RestConsumer RestConsumer
+@inject LoadingService LoadingService
 @page "/"
 
 <div class="container">
@@ -21,7 +22,6 @@
     const string ACCEPTED_FILE_TYPES = "image/png,image/jpeg,application/pdf";
     const string PDF_FILE_TYPE = "application/pdf";
     const string IMAGE_FILE_TYPE = "image";
-    private bool isLoading = true;
 
     private async Task SendToAnalyze(List<IFileListEntry> files)
     {
@@ -39,13 +39,14 @@
                 FileType = GetFileType(file.Type)
             };
 
-            isLoading = true;
+            LoadingService.StartLoading();
             var analysisResponse = await RestConsumer.PostResponse<AnalysisResponse, AnalysisRequest>(Endpoints.ANALYSIS, request);
-            isLoading = false;
+            LoadingService.StopLoading();
             await HandleAnalysisResponse(analysisResponse);
         }
         catch (Exception)
         {
+            if (LoadingService.IsLoading) LoadingService.StopLoading();
             NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Error", Detail = Resource.AnErrorOcurred });
         }
     }
