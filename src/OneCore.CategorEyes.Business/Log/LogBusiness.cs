@@ -3,6 +3,7 @@ using OneCore.CategorEyes.Commons.Consts;
 using OneCore.CategorEyes.Commons.Entities;
 using OneCore.CategorEyes.Commons.Requests;
 using OneCore.CategorEyes.Commons.Responses;
+using System.Linq.Expressions;
 
 namespace OneCore.CategorEyes.Business.Log
 {
@@ -17,16 +18,13 @@ namespace OneCore.CategorEyes.Business.Log
 
         public async Task<LogResponse> GetPaged(LogRequest request)
         {
-            (IReadOnlyList<Historical> historicals, int totalPages) = !string.IsNullOrEmpty(request.Filter?.Trim()) ?
-                await _unitOfWork.HistoricalRepository.GetPagedAsync(request.Skip, request.Take, x => x.Description.Contains(request.Filter!), request.Sort) :
-                await _unitOfWork.HistoricalRepository.GetPagedAsync(request.Skip, request.Take, sortDescriptor: request.Sort);
+            var response = await GetHistoricals(request, (skip, take, filter, sort) =>
+                _unitOfWork.HistoricalRepository.GetPagedAsync(skip, take, filter, sort));
 
             return new LogResponse
             {
-                Historicals = historicals.ToList(),
-                Page = request.Skip,
-                PageSize = request.Take,
-                TotalPages = totalPages
+                Historicals = response.Item1.ToList(),
+                TotalPages = response.Item2
             };
         }
 
@@ -43,11 +41,21 @@ namespace OneCore.CategorEyes.Business.Log
             await _unitOfWork.CompleteAsync();
         }
 
-        public async Task<IEnumerable<Historical>> GetAll(LogRequest request)
+        public async Task<IEnumerable<Historical>> GetAll(LogRequest request) =>
+            await GetHistoricals(request, (skip, take, filter, sort) =>
+                _unitOfWork.HistoricalRepository.GetAllAsync(filter, sort));
+
+        private static async Task<TResponse> GetHistoricals<TResponse>(
+            LogRequest request,
+            Func<int, int, Expression<Func<Historical, bool>>?, SortDescriptor?, Task<TResponse>> fetchMethod)
         {
-            return !string.IsNullOrEmpty(request.Filter?.Trim()) ?
-                await _unitOfWork.HistoricalRepository.GetAllAsync(x => x.Description.Contains(request.Filter!), request.Sort):
-                await _unitOfWork.HistoricalRepository.GetAllAsync(sortDescriptor: request.Sort);
-        }   
+            Expression<Func<Historical, bool>>? filter = null;
+            if (!string.IsNullOrWhiteSpace(request.Filter))
+            {
+                filter = historical => historical.Description.Contains(request.Filter);
+            }
+
+            return await fetchMethod(request.Skip, request.Take, filter, request.Sort);
+        }
     }
 }
