@@ -93,7 +93,7 @@
         {
             case DocumentType.Invoice:
                 var invoiceData = JsonSerializer.Deserialize<Invoice>(analysisResponse.Data);
-                await ShowInvoiceDialog(invoiceData, analysisResponse.AdditionalData);
+                await OpenInvoiceDialog(invoiceData, analysisResponse.AdditionalData);
                 break;
             case DocumentType.GeneralText:
                 var generalTextData = JsonSerializer.Deserialize<GeneralText>(analysisResponse.Data);
@@ -129,35 +129,16 @@
     }
 
     /// <summary>
-    /// Displays a dialog showing the invoice analysis data.
+    /// Displays a dialog containing invoice data from the analysis.
     /// </summary>
-    /// <param name="invoice">Optional <see cref="Invoice"/> data extracted from the analyzed document.</param>
-    /// <param name="additionalData">A string containing additional data related to the analysis.</param>
-    /// <returns>An asynchronous task that represents the dialog display operation.</returns>
-    async Task ShowInvoiceDialog(Invoice? invoice, string additionalData)
+    /// <param name="invoice">An optional <see cref="Invoice"/> instance containing the invoice data to be displayed in the dialog.</param>
+    /// <param name="additionalData">A string containing additional information related to the analysis.</param>
+    /// <returns>A task representing the asynchronous operation of displaying the dialog.</returns>
+    async Task OpenInvoiceDialog(Invoice? invoice, string additionalData)
     {
-        await DialogService.OpenAsync(Resource.Invoice, ds =>
-    @<div>
-        @Resource.Client: @(invoice?.ClientInfo ?? string.Empty)<br />
-        @Resource.Provider: @(invoice?.ProviderInfo ?? string.Empty)<br />
-        @Resource.Date: @(invoice?.Date ?? string.Empty) <br />
-        @Resource.Products: <br />
-        @foreach (var product in invoice?.Products ?? new List<Product>())
-        {
-            <div>
-                @Resource.Name: @(product.ProductName ?? string.Empty) <br />
-                @Resource.Quantity: @(product.Quantity.ToString() ?? string.Empty) <br />
-                @Resource.Price: @(product.UnitPrice.ToString() ?? string.Empty) <br />
-                @Resource.Total: @(product.Total.ToString() ?? string.Empty) <br />
-            </div>
-        }
-        @Resource.Total: @(invoice?.Total.ToString() ?? string.Empty) <br />
-        @Resource.AdditionalData: @(additionalData ?? string.Empty)
-    </div>, new DialogOptions()
-          {
-              CssClass = "custom-dialog-class",
-              WrapperCssClass = "custom-dialog-wrapper-class"
-          });
+        await DialogService.OpenAsync<InvoiceDialog>($"{Resource.Invoice}  {invoice.InvoiceNumber ?? string.Empty}",
+            new Dictionary<string, object>() { { "Invoice", invoice }, { "AdditionalData", additionalData } },
+            new DialogOptions() { Resizable = true, Draggable = true });
     }
 
     /// <summary>

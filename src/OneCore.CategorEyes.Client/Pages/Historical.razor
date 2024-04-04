@@ -7,7 +7,7 @@
 @inject LoadingService LoadingService
 @page "/historical"
 
-<RadzenButton Text="Reset" Click="@Reset" Style="margin-bottom: 20px;" Disabled="@isLoading" />
+<RadzenButton Text="@Resource.Reset" Click="@Reset" Style="margin-bottom: 20px;" Disabled="@isLoading" />
 <RadzenButton Text="@Resource.Export" Click="@ExporToExcel" Style="margin-bottom: 20px; float: right" Icon="description" ButtonStyle="ButtonStyle.Success" Disabled="@isLoading" />
 <RadzenDataGrid @ref="grid" SelectionMode="DataGridSelectionMode.Multiple" KeyProperty="Id" IsLoading="@isLoading" Count="@count" Data="@historicals"
                 LoadData="@LoadData" FilterPopupRenderMode="PopupRenderMode.OnDemand" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
@@ -22,25 +22,26 @@
                 @switch (data.HistoricalTypeEnum)
                 {
                     case HistoricalType.DocumentUpload:
-                        <RadzenButton ButtonStyle="ButtonStyle.Info" Variant="Variant.Flat" Shade="Shade.Lighter" Icon="description" class="m-1" Click=@(async () => await JSRuntime.InvokeVoidAsync("open", data.Description, "_blank")) Text="" />
+                        <RadzenButton ButtonStyle="ButtonStyle.Primary" Variant="Variant.Flat" Shade="Shade.Lighter" Icon="description" class="m-1" Click=@(async () => await JSRuntime.InvokeVoidAsync("open", data.Description, "_blank")) Text="" />
                         break;
                     case HistoricalType.IA:
                         var documentInfo = JsonSerializer.Deserialize<AnalysisResponse>(data.Description);
                         if (documentInfo is not null)
-                        {
-                            <RadzenButton ButtonStyle="ButtonStyle.Info" Variant="Variant.Flat" Shade="Shade.Lighter" Icon="description" class="m-1" Click=@(async () => await JSRuntime.InvokeVoidAsync("open", $"{ URLs.BLOB_STORAGE_URL }{ documentInfo.FileName }", "_blank")) Text="" />
-                            
+                        {   
                             switch (documentInfo.DocumentType)
                             {
                                 case DocumentType.Invoice:
                                     var invoiceData = JsonSerializer.Deserialize<Invoice>(documentInfo.Data);
-                                    <RadzenButton ButtonStyle="ButtonStyle.Info" Variant="Variant.Flat" Shade="Shade.Lighter" Icon="info" class="m-1" Click=@(async () => await ShowInvoiceDialog(invoiceData, documentInfo.AdditionalData)) Text="" />
+                                    <RadzenButton ButtonStyle="ButtonStyle.Secondary" Variant="Variant.Flat" Shade="Shade.Lighter" Icon="request_quote" class="m-1" Click=@(async () => await JSRuntime.InvokeVoidAsync("open", $"{ URLs.BLOB_STORAGE_URL }{ documentInfo.FileName }", "_blank")) Text="" />
+                                    <RadzenButton ButtonStyle="ButtonStyle.Info" Variant="Variant.Flat" Shade="Shade.Lighter" Icon="info" class="m-1" Click=@(async () => await OpenInvoiceDialog(invoiceData, documentInfo.AdditionalData)) Text="" />
                                     break;
                                 case DocumentType.GeneralText:
                                     var generalTextData = JsonSerializer.Deserialize<GeneralText>(documentInfo.Data);
+                                    <RadzenButton ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Shade="Shade.Lighter" Icon="description" class="m-1" Click=@(async () => await JSRuntime.InvokeVoidAsync("open", $"{ URLs.BLOB_STORAGE_URL }{ documentInfo.FileName }", "_blank")) Text="" />
                                     <RadzenButton ButtonStyle="ButtonStyle.Info" Variant="Variant.Flat" Shade="Shade.Lighter" Icon="info" class="m-1" Click=@(async () => await ShowGeneralDataDialog(generalTextData, documentInfo.AdditionalData)) Text="" />
                                     break;
                                 case DocumentType.Other:
+                                    <RadzenButton ButtonStyle="ButtonStyle.Warning" Variant="Variant.Flat" Shade="Shade.Lighter" Icon="help_center" class="m-1" Click=@(async () => await JSRuntime.InvokeVoidAsync("open", $"{ URLs.BLOB_STORAGE_URL }{ documentInfo.FileName }", "_blank")) Text="" />
                                     <RadzenButton ButtonStyle="ButtonStyle.Info" Variant="Variant.Flat" Shade="Shade.Lighter" Icon="info" class="m-1" Click=@(async () =>await ShowOtherDialog(documentInfo.AdditionalData)) Text="" />
                                     break;
                             }
@@ -86,7 +87,7 @@
             {
                 Sort = GetSort(loadDataArgs),
                 Headers = new List<string> { "Id", Resource.Type, Resource.DateOfCreation, "URL", Resource.Description },
-                Filter = loadDataArgs.Filters.FirstOrDefault()?.FilterValue.ToString(),
+                Filter = loadDataArgs.Filters?.FirstOrDefault()?.FilterValue.ToString(),
             };
 
             var logsResponse = await RestConsumer.PostResponse<LogResponse, LogRequest>(Endpoints.GET_LOGS, new LogRequest
@@ -94,7 +95,7 @@
                 Skip = loadDataArgs.Skip ?? SKIP,
                 Take = loadDataArgs.Top ?? TAKE,
                 Sort = GetSort(loadDataArgs),
-                Filter = loadDataArgs.Filters.FirstOrDefault()?.FilterValue.ToString(),
+                Filter = loadDataArgs.Filters?.FirstOrDefault()?.FilterValue.ToString(),
             });
 
             foreach (var historical in logsResponse.Historicals)
@@ -128,7 +129,7 @@
     /// <returns>A task representing the asynchronous operation of resetting and reloading the data grid.</returns>
     private async Task Reset()
     {
-        await LoadData(new LoadDataArgs());
+        await LoadData(new LoadDataArgs { Skip = SKIP, Top = TAKE });
         grid.Reset(true);
         await grid.FirstPage(true);
     }
@@ -140,7 +141,7 @@
     /// <returns>A nullable <see cref="SortDescriptor"/> representing the current sort state of the data grid, or null if no sorting is applied.</returns>
     private SortDescriptor? GetSort(LoadDataArgs loadDataArgs)
     {
-        var sort = loadDataArgs.Sorts.FirstOrDefault();
+        var sort = loadDataArgs.Sorts?.FirstOrDefault();
 
         if (sort is null) return null;
 
@@ -184,7 +185,8 @@
         Description: @(generalText?.Description ?? string.Empty)<br />
         Summary: @(generalText?.Summary ?? string.Empty)<br />
         Sentiment: @(generalText?.Sentiment ?? string.Empty) <br />
-    </div>, new DialogOptions()
+            </div>
+    , new DialogOptions()
               {
                   CssClass = "custom-dialog-class",
                   WrapperCssClass = "custom-dialog-wrapper-class"
@@ -197,30 +199,11 @@
     /// <param name="invoice">An optional <see cref="Invoice"/> instance containing the invoice data to be displayed in the dialog.</param>
     /// <param name="additionalData">A string containing additional information related to the analysis.</param>
     /// <returns>A task representing the asynchronous operation of displaying the dialog.</returns>
-    async Task ShowInvoiceDialog(Invoice? invoice, string additionalData)
+    async Task OpenInvoiceDialog(Invoice? invoice, string additionalData)
     {
-        await DialogService.OpenAsync("General Data", ds =>
-    @<div>
-        Cliente: @(invoice?.ClientInfo ?? string.Empty)<br />
-        Proveedor: @(invoice?.ProviderInfo ?? string.Empty)<br />
-        Fecha: @(invoice?.Date ?? string.Empty) <br />
-        Productos: <br />
-        @foreach (var product in invoice?.Products ?? new List<Product>())
-        {
-            <div>
-                Nombre: @(product.ProductName ?? string.Empty) <br />
-                Cantidad: @(product.Quantity.ToString() ?? string.Empty) <br />
-                Precio: @(product.UnitPrice.ToString() ?? string.Empty) <br />
-                Total: @(product.Total.ToString() ?? string.Empty) <br />
-            </div>
-        }
-        Total: @(invoice?.Total.ToString() ?? string.Empty) <br />
-        AdditionalData: @(additionalData ?? string.Empty)
-    </div>, new DialogOptions()
-              {
-                  CssClass = "custom-dialog-class",
-                  WrapperCssClass = "custom-dialog-wrapper-class"
-              });
+        await DialogService.OpenAsync<InvoiceDialog>($"{Resource.Invoice}  {invoice.InvoiceNumber ?? string.Empty}",
+        new Dictionary<string, object>() { { "Invoice", invoice }, { "AdditionalData", additionalData } }, 
+        new DialogOptions() { Resizable = true, Draggable = true });
     }
 
     /// <summary>

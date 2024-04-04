@@ -31,13 +31,15 @@
             'DocumentTypeName', en él pondrás 'Invoice' si es una factura o 'GeneralText' si es un texto en general. En caso que no sea ninguno de los ateriores pondrás 'Other' e ignorarás el resto de los campos.
             Luego quiero que me llenes un nuevo atributo que se llame 'Data' el cuál debe ser una cadena JSON que luego pueda parsear a un objeto json con los siguientes campos.
             En caso de que haya sido factura: 
-            1. ClientInfo en este pondrás el nombre y dirección del cliente.
-            2. ProviderInfo en este pondrás el nombre y dirección del proveedor.
-            3. InvoiceNumber en este pondrás el no. de Factura.
-            4. Date en este pondrás la fecha de la factura.
-            5. Products, este será un arreglo del siguiente tipo: { 'ProductName': incluirá el nombre del producto, 'Quantity': cantidad del producto, 'UnitPrice': precio unitario del producto, 'Total': total para ese producto} incluye productos con costo cero también.
-            6. Total en este pondrás el total de la factura.
-            7. Verifica que la suma del total por producto (ignorando nulls) sea igual al total general, si no vuelve a analizar.
+            1. ClientName en este pondrás el nombre del cliente.
+            2. ClientAddress en este pondrás la dirección del cliente.
+            3. ProviderName en este pondrás el nombre y dirección del proveedor.
+            4. ProviderAddress en este pondrás la dirección del proveedor.
+            5. InvoiceNumber en este pondrás el no. de Factura.
+            6. Date en este pondrás la fecha de la factura.
+            7. Products, este será un arreglo del siguiente tipo: { 'ProductName': incluirá el nombre del producto, 'Quantity': cantidad del producto, 'UnitPrice': precio unitario del producto, 'Total': total para ese producto} incluye productos con costo cero también.
+            8. Total en este pondrás el total de la factura.
+            9. Verifica que la suma del total por producto (ignorando nulls) sea igual al total general, si no vuelve a analizar.
             En caso de que sea un 'GeneralText', el atributo 'Data' debe contener lo siguiente: 
             1. Description una descripción del texto.
             2. Summary Un resumen del texto

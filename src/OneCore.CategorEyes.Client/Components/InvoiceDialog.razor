@@ -1,0 +1,55 @@
+﻿@inject DialogService DialogService
+@inject TooltipService TooltipService
+
+<RadzenStack Gap="1rem" Orientation="Orientation.Vertical" JustifyContent="JustifyContent.SpaceBetween" Style="height: 100%;">
+    <RadzenStack>
+        <RadzenRow>
+            <RadzenColumn Size="12" SizeMD="6" Class="rz-p-4 rz-border-radius-1" Style="border: var(--rz-grid-cell-border)">
+                <RadzenText TextStyle="TextStyle.Subtitle1">@Resource.Client</RadzenText>
+                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center">
+                    <RadzenStack Gap="0" Class="rz-text-truncate">
+                        <RadzenText TextStyle="TextStyle.Overline" Class="rz-mt-2 rz-my-0" Style="color: var(--rz-text-tertiary-color);">@Resource.Name</RadzenText>
+                        <RadzenText TextStyle="TextStyle.Body1" Class="rz-text-truncate"><b>@(Invoice.ClientName ?? string.Empty)</b></RadzenText>
+                        <RadzenText TextStyle="TextStyle.Overline" Class="rz-mt-4 rz-mb-0" Style="color: var(--rz-text-tertiary-color);">@Resource.Address</RadzenText>
+                        <RadzenText TextStyle="TextStyle.Body1" Class="rz-text-truncate"><b>@(Invoice.ClientAddress ?? string.Empty)</b></RadzenText>
+                    </RadzenStack>
+                </RadzenStack>
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeMD="6" Class="rz-p-4 rz-border-radius-1" Style="border: var(--rz-grid-cell-border)">
+                <RadzenText TextStyle="TextStyle.Subtitle1">@Resource.Provider</RadzenText>
+                <RadzenStack Gap="0" Class="rz-text-truncate">
+                    <RadzenText TextStyle="TextStyle.Overline" Class="rz-mt-2 rz-my-0" Style="color: var(--rz-text-tertiary-color);">@Resource.Name</RadzenText>
+                    <RadzenText TextStyle="TextStyle.Body1" Class="rz-text-truncate"><b>@(Invoice.ProviderName ?? string.Empty)</b></RadzenText>
+                    <RadzenText TextStyle="TextStyle.Overline" Class="rz-mt-4 rz-mb-0" Style="color: var(--rz-text-tertiary-color);">@Resource.Address</RadzenText>
+                    <RadzenText TextStyle="TextStyle.Body1" Class="rz-text-truncate"><b>@(Invoice.ProviderAddress ?? string.Empty)</b></RadzenText>
+                </RadzenStack>
+            </RadzenColumn>
+        </RadzenRow>
+        <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.SpaceBetween" AlignItems="AlignItems.Center">
+            <RadzenButton Icon="info" MouseEnter="@(args => ShowTooltip(args) )" ButtonStyle="ButtonStyle.Info" />
+            <RadzenBadge BadgeStyle="BadgeStyle.Secondary" Text=@($"{String.Format(new System.Globalization.CultureInfo("en-US"), "{0:C}", Invoice.Total)}") />
+        </RadzenStack>
+        <RadzenDataGrid AllowFiltering="false" AllowPaging="true" AllowSorting="true" FilterPopupRenderMode="PopupRenderMode.OnDemand" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                        Data="@Invoice.Products" TItem="Product" ColumnWidth="200px" Density="Density.Compact" AllowAlternatingRows="false">
+            <Columns>
+                <RadzenDataGridColumn TItem="Product" Property="ProductName" Title="@(Resource.Name)" />
+                <RadzenDataGridColumn TItem="Product" Property="Quantity" Title="@(Resource.Quantity)" />
+                <RadzenDataGridColumn TItem="Product" Property="UnitPrice" Title="@(Resource.Price)" FormatString="{0:C}" />
+                <RadzenDataGridColumn TItem="Product" Property="Total" Title="@(Resource.Total)" FormatString="{0:C}" />
+            </Columns>
+        </RadzenDataGrid>
+    </RadzenStack>
+    <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Gap="0.5rem">
+        <RadzenButton Click="@((args) => DialogService.Close(true))" Variant="Variant.Flat" Text="@(Resource.Close)" Style="width: 120px" />
+    </RadzenStack>
+</RadzenStack>
+
+@code {
+    [Parameter]
+    public Invoice Invoice { get; set; }
+
+    [Parameter]
+    public string? AdditionalData { get; set; }
+
+    void ShowTooltip(ElementReference elementReference, TooltipOptions options = null) => TooltipService.Open(elementReference, AdditionalData ?? string.Empty, options);
+}

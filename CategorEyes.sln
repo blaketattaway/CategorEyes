@@ -17,7 +17,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{F4FD867F
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OneCore.CategorEyes.Infrastructure", "src\OneCore.CategorEyes.Infrastructure\OneCore.CategorEyes.Infrastructure.csproj", "{EBC11883-4233-4D3E-8112-DFD92EE712DD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OneCore.CategorEyes.Tests", "tests\OneCore.CategorEyes.Tests\OneCore.CategorEyes.Tests.csproj", "{0DE715BA-8001-41AF-96E4-ABF9042EB905}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OneCore.CategorEyes.Tests", "tests\OneCore.CategorEyes.Tests\OneCore.CategorEyes.Tests.csproj", "{0DE715BA-8001-41AF-96E4-ABF9042EB905}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

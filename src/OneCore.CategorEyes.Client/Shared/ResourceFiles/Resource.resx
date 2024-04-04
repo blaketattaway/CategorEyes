@@ -184,4 +184,13 @@
   <data name="UnrecognizedDocumentType" xml:space="preserve">
     <value>Unrecognized document type</value>
   </data>
+  <data name="Address" xml:space="preserve">
+    <value>Address</value>
+  </data>
+  <data name="Close" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  <data name="Reset" xml:space="preserve">
+    <value>Reset</value>
+  </data>
 </root>
