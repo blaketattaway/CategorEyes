@@ -29,7 +29,14 @@ namespace OneCore.CategorEyes.Infrastructure.Persistence.Repositories
         /// <inheritdoc/>
         public async Task AddAsync(T entity)
         {
-            await _dbContext.Set<T>().AddAsync(entity);
+            try
+            {
+                await _dbContext.Set<T>().AddAsync(entity);
+            }
+            catch (Exception)
+            {
+                throw new Exception("AddAsync failed");
+            }
         }
 
         /// <summary>

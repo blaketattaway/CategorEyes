@@ -40,15 +40,18 @@ namespace OneCore.CategorEyes.Business.Analysis
         {
             try
             {
+                ValidateRequest(request);
+
                 string fileName = await UploadFileAndLog(request);
+
+                if (fileName.Equals(string.Empty))
+                    throw new Exception("Error uploading file");
 
                 await _unitOfWork.HistoricalRepository.AddAsync(new Historical
                 {
                     HistoricalType = (byte)HistoricalType.DocumentUpload,
                     Description = fileName
                 });
-
-                ValidateRequest(request);
 
                 var openAIResponse = await GetOpenAIResponse(request);
 
@@ -63,6 +66,17 @@ namespace OneCore.CategorEyes.Business.Analysis
                 _logger.LogError(ex.Message);
                 throw;
             }
+        }
+
+        /// <summary>
+        /// Checks if a given string is a valid Base64 encoded string.
+        /// </summary>
+        /// <param name="base64">The string to validate, of type <see cref="string"/>.</param>
+        /// <returns><c>true</c> if the string is a valid Base64 encoded string; otherwise, <c>false</c>, of type <see cref="bool"/>.</returns>
+        private static bool IsBase64String(string base64)
+        {
+            Span<byte> buffer = new Span<byte>(new byte[base64.Length]);
+            return Convert.TryFromBase64String(base64, buffer, out int bytesParsed);
         }
 
         /// <summary>
@@ -86,7 +100,7 @@ namespace OneCore.CategorEyes.Business.Analysis
         /// <param name="openAIResponse">OpenAI's response, of type <see cref="OpenAIAnalysisResponse"/>.</param>
         /// <param name="fileName">The name of the analyzed file, of type <see cref="string"/>.</param>
         /// <returns>The processed analysis response, of type <see cref="AnalysisResponse"/>.</returns>
-        private AnalysisResponse ProcessOpenAIResponse(OpenAIAnalysisResponse openAIResponse, string fileName)
+        private static AnalysisResponse ProcessOpenAIResponse(OpenAIAnalysisResponse openAIResponse, string fileName)
         {
             var responseContent = RemoveInvalidChars(openAIResponse.choices.FirstOrDefault()!.message.content);
             var response = ParseTo<AnalysisResponse>(responseContent);
@@ -137,7 +151,7 @@ namespace OneCore.CategorEyes.Business.Analysis
             }
 
             if (string.IsNullOrEmpty(processed.ToString()))
-                throw new Exception("There's no text to send");
+                throw new Exception("The pdf has no text to send");
 
             return processed.ToString();
         }
@@ -163,7 +177,7 @@ namespace OneCore.CategorEyes.Business.Analysis
         /// </summary>
         /// <param name="request">The analysis request, of type <see cref="AnalysisRequest"/>.</param>
         /// <returns>The formatted request for OpenAI, of type <see cref="object"/> due to the dynamic structure expected by the OpenAI service.</returns>
-        private object CreateOpenAIRequest(AnalysisRequest request)
+        private static object CreateOpenAIRequest(AnalysisRequest request)
         {
             return request.FileType switch
             {
@@ -178,7 +192,7 @@ namespace OneCore.CategorEyes.Business.Analysis
         /// </summary>
         /// <param name="request">The analysis request containing the base64-encoded PDF document, of type <see cref="AnalysisRequest"/>.</param>
         /// <returns>A request configured for PDF analysis, ready to be sent to OpenAI, of type <see cref="object"/> due to the dynamic structure expected by the OpenAI service.</returns>
-        private object CreatePdfRequest(AnalysisRequest request)
+        private static object CreatePdfRequest(AnalysisRequest request)
         {
             var content = new List<object>
             {
@@ -194,7 +208,7 @@ namespace OneCore.CategorEyes.Business.Analysis
         /// </summary>
         /// <param name="request">The analysis request containing the base64-encoded image, of type <see cref="AnalysisRequest"/>.</param>
         /// <returns>A request configured for image analysis, ready to be sent to OpenAI, of type <see cref="object"/> due to the dynamic structure expected by the OpenAI service.</returns>
-        private object CreateImageRequest(AnalysisRequest request)
+        private static object CreateImageRequest(AnalysisRequest request)
         {
             var content = new List<object>
         {
@@ -210,7 +224,7 @@ namespace OneCore.CategorEyes.Business.Analysis
         /// </summary>
         /// <param name="content">The specific content of the analysis, whether for a PDF document or an image, represented as a list of <see cref="object"/> following the structure expected by the OpenAI service.</param>
         /// <returns>The base request configured with the specific content for analysis, of type <see cref="object"/> due to the dynamic structure expected by the OpenAI service.</returns>
-        private object CreateBaseRequest(List<object> content)
+        private static object CreateBaseRequest(List<object> content)
         {
             return new
             {
@@ -224,10 +238,14 @@ namespace OneCore.CategorEyes.Business.Analysis
         /// Validates the analysis request to ensure the file type is supported.
         /// </summary>
         /// <param name="request">The analysis request to validate, of type <see cref="AnalysisRequest"/>.</param>
-        private void ValidateRequest(AnalysisRequest request)
+        private static void ValidateRequest(AnalysisRequest request)
         {
             if (request.FileType == FileType.Unknown)
                 throw new ArgumentException("Unknown file type");
+            if (string.IsNullOrEmpty(request.Base64File.Trim()))
+                throw new ArgumentException("Base64File cannot be null");
+            if (!IsBase64String(request.Base64File))
+                throw new ArgumentException("Invalid base64 string");
         }
 
         /// <summary>
