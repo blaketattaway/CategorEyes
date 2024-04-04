@@ -71,6 +71,11 @@
     const string HISTORICAL_TYPE_ENUM_PROP_NAME = "HistoricalTypeEnum";
     ReportRequest currentRequest;
 
+    /// <summary>
+    /// Loads historical data based on provided arguments for filtering, sorting, and pagination.
+    /// </summary>
+    /// <param name="loadDataArgs">A <see cref="LoadDataArgs"/> instance containing arguments for data loading such as filters, sort orders, and pagination details.</param>
+    /// <returns>A task representing the asynchronous operation of data loading.</returns>
     async Task LoadData(LoadDataArgs loadDataArgs)
     {
         isLoading = true;
@@ -117,6 +122,10 @@
         isLoading = false;
     }
 
+    /// <summary>
+    /// Resets the data grid to its initial state and reloads the data.
+    /// </summary>
+    /// <returns>A task representing the asynchronous operation of resetting and reloading the data grid.</returns>
     private async Task Reset()
     {
         await LoadData(new LoadDataArgs());
@@ -124,6 +133,11 @@
         await grid.FirstPage(true);
     }
 
+    /// <summary>
+    /// Extracts the sort descriptor from the data loading arguments.
+    /// </summary>
+    /// <param name="loadDataArgs">A <see cref="LoadDataArgs"/> instance containing the current state of the data grid including sort information.</param>
+    /// <returns>A nullable <see cref="SortDescriptor"/> representing the current sort state of the data grid, or null if no sorting is applied.</returns>
     private SortDescriptor? GetSort(LoadDataArgs loadDataArgs)
     {
         var sort = loadDataArgs.Sorts.FirstOrDefault();
@@ -137,6 +151,10 @@
         };
     }
 
+    /// <summary>
+    /// Initiates the export of historical data to an Excel file.
+    /// </summary>
+    /// <returns>A task representing the asynchronous operation of exporting data to Excel.</returns>
     private async Task ExporToExcel()
     {
         try
@@ -153,6 +171,12 @@
         }
     }
 
+    /// <summary>
+    /// Displays a dialog containing general text data from the analysis.
+    /// </summary>
+    /// <param name="generalText">An optional <see cref="GeneralText"/> instance containing the data to be displayed in the dialog.</param>
+    /// <param name="additionalData">A string containing additional information related to the analysis.</param>
+    /// <returns>A task representing the asynchronous operation of displaying the dialog.</returns>
     async Task ShowGeneralDataDialog(GeneralText? generalText, string additionalData)
     {
         await DialogService.OpenAsync("General Data", ds =>
@@ -167,6 +191,12 @@
               });
     }
 
+    /// <summary>
+    /// Displays a dialog containing invoice data from the analysis.
+    /// </summary>
+    /// <param name="invoice">An optional <see cref="Invoice"/> instance containing the invoice data to be displayed in the dialog.</param>
+    /// <param name="additionalData">A string containing additional information related to the analysis.</param>
+    /// <returns>A task representing the asynchronous operation of displaying the dialog.</returns>
     async Task ShowInvoiceDialog(Invoice? invoice, string additionalData)
     {
         await DialogService.OpenAsync("General Data", ds =>
@@ -193,6 +223,11 @@
               });
     }
 
+    /// <summary>
+    /// Displays a dialog for documents categorized as "Other" in the analysis, showing any additional data.
+    /// </summary>
+    /// <param name="additionalData">A string containing additional information related to the analysis.</param>
+    /// <returns>A task representing the asynchronous operation of displaying the dialog.</returns>
     async Task ShowOtherDialog(string additionalData)
     {
         await DialogService.OpenAsync("Unidentified", ds =>

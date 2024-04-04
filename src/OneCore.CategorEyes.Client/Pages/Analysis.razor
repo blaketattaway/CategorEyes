@@ -23,6 +23,11 @@
     const string PDF_FILE_TYPE = "application/pdf";
     const string IMAGE_FILE_TYPE = "image";
 
+    /// <summary>
+    /// Initiates the analysis process for the selected files.
+    /// </summary>
+    /// <param name="files">A list of <see cref="IFileListEntry"/> representing the selected files for analysis.</param>
+    /// <returns>An asynchronous task that represents the completion of the file analysis process.</returns>
     private async Task SendToAnalyze(List<IFileListEntry> files)
     {
         try
@@ -51,12 +56,22 @@
         }
     }
 
+    /// <summary>
+    /// Reads a file and converts its content to a Base64 encoded string.
+    /// </summary>
+    /// <param name="file">The <see cref="IFileListEntry"/> representing the file to be read.</param>
+    /// <returns>A task that represents the asynchronous read operation, returning the Base64 encoded string of the file content.</returns>
     private async Task<string> ReadFileAsBase64(IFileListEntry file)
     {
         using var ms = await file.ReadAllAsync(MAX_FILE_SIZE);
         return Convert.ToBase64String(ms.ToArray());
     }
 
+    /// <summary>
+    /// Determines the type of the file based on its MIME type.
+    /// </summary>
+    /// <param name="fileType">A string representing the MIME type of the file.</param>
+    /// <returns>The determined <see cref="FileType"/> enumeration value.</returns>
     private FileType GetFileType(string fileType)
     {
         return fileType switch
@@ -67,6 +82,11 @@
         };
     }
 
+    /// <summary>
+    /// Handles the analysis response by triggering the appropriate dialog based on the document type.
+    /// </summary>
+    /// <param name="analysisResponse">The <see cref="AnalysisResponse"/> received from the analysis service.</param>
+    /// <returns>An asynchronous task that represents the handling of the analysis response.</returns>
     private async Task HandleAnalysisResponse(AnalysisResponse analysisResponse)
     {
         switch (analysisResponse?.DocumentType)
@@ -88,6 +108,12 @@
         }
     }
 
+    /// <summary>
+    /// Displays a dialog showing the general text analysis data.
+    /// </summary>
+    /// <param name="generalText">Optional <see cref="GeneralText"/> data extracted from the analyzed document.</param>
+    /// <param name="additionalData">A string containing additional data related to the analysis.</param>
+    /// <returns>An asynchronous task that represents the dialog display operation.</returns>
     async Task ShowGeneralDataDialog(GeneralText? generalText, string additionalData)
     {
         await DialogService.OpenAsync(Resource.GeneralText, ds =>
@@ -102,6 +128,12 @@
           });
     }
 
+    /// <summary>
+    /// Displays a dialog showing the invoice analysis data.
+    /// </summary>
+    /// <param name="invoice">Optional <see cref="Invoice"/> data extracted from the analyzed document.</param>
+    /// <param name="additionalData">A string containing additional data related to the analysis.</param>
+    /// <returns>An asynchronous task that represents the dialog display operation.</returns>
     async Task ShowInvoiceDialog(Invoice? invoice, string additionalData)
     {
         await DialogService.OpenAsync(Resource.Invoice, ds =>
@@ -128,6 +160,11 @@
           });
     }
 
+    /// <summary>
+    /// Displays a dialog for documents that could not be categorized into a specific type, showing any additional data.
+    /// </summary>
+    /// <param name="additionalData">A string containing additional data related to the analysis.</param>
+    /// <returns>An asynchronous task that represents the dialog display operation.</returns>
     async Task ShowOtherDialog(string additionalData)
     {
         await DialogService.OpenAsync("Unidentified", ds =>

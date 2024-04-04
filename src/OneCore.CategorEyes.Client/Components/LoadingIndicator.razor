@@ -11,17 +11,27 @@
 @code {
     private bool isLoading;
 
+    /// <summary>
+    /// Initializes the component and subscribes to the loading state changes from the <see cref="LoadingService"/>.
+    /// </summary>
     protected override void OnInitialized()
     {
         LoadingService.OnLoadingChanged += HandleLoadingChanged;
     }
 
+    /// <summary>
+    /// Updates the component's loading state and triggers a re-render when the loading state changes.
+    /// </summary>
+    /// <param name="loading">A boolean indicating the new loading state, where <c>true</c> means loading is in progress and <c>false</c> means loading has ended.</param>
     private void HandleLoadingChanged(bool loading)
     {
         isLoading = loading;
         StateHasChanged();
     }
 
+    /// <summary>
+    /// Unsubscribes from the loading state changes and cleans up resources when the component is disposed.
+    /// </summary>
     public void Dispose()
     {
         LoadingService.OnLoadingChanged -= HandleLoadingChanged;
