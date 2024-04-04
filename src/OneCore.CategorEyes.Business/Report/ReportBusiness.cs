@@ -13,12 +13,21 @@ using System.Text.Json;
 
 namespace OneCore.CategorEyes.Business.Report
 {
+    /// <summary>
+    /// Responsible for generating and managing reports related to the application's logging system.
+    /// </summary>
     public class ReportBusiness : IReportBusiness
     {
         private readonly ILogBusiness _logBusiness;
         private readonly IConfiguration _configuration;
         private readonly IBlobService _blobService;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ReportBusiness"/> class with the necessary services.
+        /// </summary>
+        /// <param name="logBusiness">The log business service used to retrieve log entries.</param>
+        /// <param name="configuration">The configuration service for accessing application settings.</param>
+        /// <param name="blobService">The blob service used for storing and retrieving report files.</param>
         public ReportBusiness(ILogBusiness logBusiness, IConfiguration configuration, IBlobService blobService)
         {
             _logBusiness = logBusiness;
@@ -26,6 +35,7 @@ namespace OneCore.CategorEyes.Business.Report
             _blobService = blobService;
         }
 
+        /// <inheritdoc />
         public async Task<ReportResponse> GenerateReport(ReportRequest request)
         {
             var reportByteArray = await GenerateExcel(request);
@@ -40,6 +50,11 @@ namespace OneCore.CategorEyes.Business.Report
             return new() { Url = $"{_configuration[Blob.BLOB_REPORTS_CONTAINER_URL_KEY]}{reportName}" };
         }
 
+        /// <summary>
+        /// Generates the Excel report content as a byte array.
+        /// </summary>
+        /// <param name="request">The <see cref="ReportRequest"/> containing parameters for the report generation.</param>
+        /// <returns>A <see cref="Task{byte[]}"/> representing the asynchronous operation, containing the generated Excel report as a byte array.</returns>
         private async Task<byte[]> GenerateExcel(ReportRequest request)
         {
             using ExcelPackage excelPackage = new();
@@ -58,6 +73,11 @@ namespace OneCore.CategorEyes.Business.Report
             return excelPackage.GetAsByteArray();
         }
 
+        /// <summary>
+        /// Adds headers to the Excel worksheet.
+        /// </summary>
+        /// <param name="headers">A <see cref="List{string}"/> representing the headers to be added to the worksheet.</param>
+        /// <param name="worksheet">The <see cref="ExcelWorksheet"/> where headers will be added.</param>
         private static void AddHeaders(List<string> headers, ExcelWorksheet worksheet)
         {
             int row = 1;
@@ -71,6 +91,11 @@ namespace OneCore.CategorEyes.Business.Report
             worksheet.Cells[1, 1, 1, column].Style.Font.Bold = true;
         }
 
+        /// <summary>
+        /// Adds historical data to the Excel worksheet.
+        /// </summary>
+        /// <param name="historicals">An <see cref="IEnumerable{Historical}"/> containing historical data to be added to the worksheet.</param>
+        /// <param name="worksheet">The <see cref="ExcelWorksheet"/> where historical data will be added.</param>
         private void AddData(IEnumerable<Historical> historicals, ExcelWorksheet worksheet)
         {
             int row = 2;
@@ -113,7 +138,13 @@ namespace OneCore.CategorEyes.Business.Report
             StyleWorksheet(worksheet, historicals.Count() + 1, column - 1);
         }
 
-        private void StyleWorksheet(ExcelWorksheet worksheet, int rowCount, int columnCount)
+        /// <summary>
+        /// Applies styling to the Excel worksheet.
+        /// </summary>
+        /// <param name="worksheet">The <see cref="ExcelWorksheet"/> to be styled.</param>
+        /// <param name="rowCount">The number of rows in the worksheet, including headers.</param>
+        /// <param name="columnCount">The number of columns in the worksheet.</param>
+        private static void StyleWorksheet(ExcelWorksheet worksheet, int rowCount, int columnCount)
         {
             worksheet.Cells[1, 1, rowCount, columnCount].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
             worksheet.Cells[1, 1, rowCount, columnCount].AutoFitColumns();
