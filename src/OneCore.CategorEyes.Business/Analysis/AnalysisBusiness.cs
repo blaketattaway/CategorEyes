@@ -35,6 +35,7 @@ namespace OneCore.CategorEyes.Business.Analysis
             _logger = logger;
         }
 
+        /// <inheritdoc />
         public async Task<AnalysisResponse> Analyze(AnalysisRequest request)
         {
             try

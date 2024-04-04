@@ -24,6 +24,7 @@ namespace OneCore.CategorEyes.Infrastructure.Persistence
 
         public IHistoricalRepository HistoricalRepository { get; }
 
+        /// <inheritdoc />
         public async Task<int> CompleteAsync()
         {
             try
@@ -41,6 +42,7 @@ namespace OneCore.CategorEyes.Infrastructure.Persistence
 
         }
 
+        /// <inheritdoc />
         public IAsyncRepository<T> Repository<T>() where T : BaseEntity
         {
             if (_repositories is null)

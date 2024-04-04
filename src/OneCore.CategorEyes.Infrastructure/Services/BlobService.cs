@@ -30,6 +30,7 @@ namespace OneCore.CategorEyes.Infrastructure.Services
             _logger = logger;
         }
 
+        /// <inheritdoc />
         public async Task<string> UploadFile(FileUpload fileUpload, bool isReport = false)
         {
             try

@@ -19,6 +19,7 @@ namespace OneCore.CategorEyes.Infrastructure.Services
             _httpClientFactory = new HttpClientFactory(configuration);
         }
 
+        /// <inheritdoc />
         public async Task<OpenAIAnalysisResponse> Analyze(object request)
         {
             return await new RestConsumer(_httpClientFactory, BaseAPI.OpenAIAPI).PostResponseAsync<OpenAIAnalysisResponse, object>("chat/completions", request);
