@@ -73,6 +73,15 @@
     ReportRequest currentRequest;
 
     /// <summary>
+    /// Method invoked when the component is ready to start, used to send a user interaction request to the server.
+    /// </summary>
+    /// <returns>An asynchronous task that represents the completion of adding user interaction</returns>
+    protected override async Task OnInitializedAsync()
+    {
+        await AddInteraction(UserAction.EnterHistoricalPage);
+    }
+
+    /// <summary>
     /// Loads historical data based on provided arguments for filtering, sorting, and pagination.
     /// </summary>
     /// <param name="loadDataArgs">A <see cref="LoadDataArgs"/> instance containing arguments for data loading such as filters, sort orders, and pagination details.</param>
@@ -83,9 +92,14 @@
 
         try
         {
+            SortDescriptor? sort = GetSort(loadDataArgs);
+
+            if (loadDataArgs.Filters != null && loadDataArgs.Filters?.FirstOrDefault()?.FilterValue?.ToString() != null &&  loadDataArgs.Filters?.FirstOrDefault()?.FilterValue?.ToString() != currentRequest.Filter)
+                await AddInteraction(UserAction.FilterHistorical);
+
             currentRequest = new ReportRequest
             {
-                Sort = GetSort(loadDataArgs),
+                Sort = sort,
                 Headers = new List<string> { "Id", Resource.Type, Resource.DateOfCreation, "URL", Resource.Description },
                 Filter = loadDataArgs.Filters?.FirstOrDefault()?.FilterValue.ToString(),
             };
@@ -94,7 +108,7 @@
             {
                 Skip = loadDataArgs.Skip ?? SKIP,
                 Take = loadDataArgs.Top ?? TAKE,
-                Sort = GetSort(loadDataArgs),
+                Sort = sort,
                 Filter = loadDataArgs.Filters?.FirstOrDefault()?.FilterValue.ToString(),
             });
 
@@ -115,13 +129,28 @@
             historicals = logsResponse.Historicals.AsODataEnumerable<Models.Historical>();
             count = logsResponse.TotalPages;
         }
-        catch (Exception)
+        catch (Exception ex)
         {
             NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Error", Detail = Resource.AnErrorOcurred });
         }
 
         isLoading = false;
     }
+
+    private async Task AddInteraction(UserAction userAction)
+    {
+        try
+        {
+            LoadingService.StartLoading();
+            await RestConsumer.PostResponse<object, UserInteractionRequest>(Endpoints.ADD_INTERACTION, new UserInteractionRequest { UserInteractionType = (int)userAction });
+            LoadingService.StopLoading();
+        }
+        catch
+        {
+            if (LoadingService.IsLoading) LoadingService.StopLoading();
+        }
+    }
+
 
     /// <summary>
     /// Resets the data grid to its initial state and reloads the data.

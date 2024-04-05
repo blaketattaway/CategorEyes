@@ -24,6 +24,25 @@
     const string IMAGE_FILE_TYPE = "image";
 
     /// <summary>
+    /// Method invoked when the component is ready to start, used to send a user interaction request to the server.
+    /// </summary>
+    /// <returns>An asynchronous task that represents the completion of adding user interaction</returns>
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            LoadingService.StartLoading();
+            var request = new UserInteractionRequest { UserInteractionType = (int)UserAction.EnterAnalysisPage };
+            await RestConsumer.PostResponse<object, UserInteractionRequest>(Endpoints.ADD_INTERACTION, request);
+            LoadingService.StopLoading();
+        }
+        catch (Exception)
+        {
+            if (LoadingService.IsLoading) LoadingService.StopLoading();
+        }
+    }
+
+    /// <summary>
     /// Initiates the analysis process for the selected files.
     /// </summary>
     /// <param name="files">A list of <see cref="IFileListEntry"/> representing the selected files for analysis.</param>

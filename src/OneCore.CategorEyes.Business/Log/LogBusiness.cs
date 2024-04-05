@@ -43,7 +43,7 @@ namespace OneCore.CategorEyes.Business.Log
             {
                 HistoricalType = (int)HistoricalType.UserInteraction,
                 CreationDate = DateTime.Now,
-                Description = ((UserActions)request.UserInteractionType).GetDescription()
+                Description = ((UserAction)request.UserInteractionType).GetDescription()
             };
 
             await _unitOfWork.HistoricalRepository.AddAsync(historical);

@@ -48,6 +48,15 @@ namespace OneCore.CategorEyes.Client.Models
             public const string ANALYSIS = "https://localhost:7112/api/Analysis/Analyze";
             public const string GET_LOGS = "https://localhost:7112/api/Log/GetLogs";
             public const string GENERATE_REPORT = "https://localhost:7112/api/Report/Generate";
+            public const string ADD_INTERACTION = "https://localhost:7112/api/Log/AddInteraction";
+        }
+
+        public enum UserAction
+        {
+            EnterAnalysisPage = 1,
+            EnterHistoricalPage = 2,
+            FilterHistorical = 3,
+            ExportHistorical = 4,
         }
     }
 }

@@ -3,6 +3,7 @@ using OfficeOpenXml;
 using OfficeOpenXml.Style;
 using OneCore.CategorEyes.Business.Extensions;
 using OneCore.CategorEyes.Business.Log;
+using OneCore.CategorEyes.Business.Persistence;
 using OneCore.CategorEyes.Business.Services;
 using OneCore.CategorEyes.Commons.Consts;
 using OneCore.CategorEyes.Commons.Entities;
@@ -38,16 +39,32 @@ namespace OneCore.CategorEyes.Business.Report
         /// <inheritdoc />
         public async Task<ReportResponse> GenerateReport(ReportRequest request)
         {
-            var reportByteArray = await GenerateExcel(request);
-
-            var reportName = await _blobService.UploadFile(new Commons.Blob.FileUpload
+            try
             {
-                Base64File = Convert.ToBase64String(reportByteArray),
-                Extension = "xlsx",
-                ContentType = ContentType.APPLICATION_XLSX,
-            }, true);
+                await _logBusiness.AddUserInteraction(new UserInteractionRequest { UserInteractionType = (int)UserAction.ExportHistorical });
 
-            return new() { Url = $"{_configuration[Blob.BLOB_REPORTS_CONTAINER_URL_KEY]}{reportName}" };
+                if (string.IsNullOrEmpty(_configuration[Blob.BLOB_FILES_CONTAINER_URL_KEY]) || string.IsNullOrEmpty(_configuration[Blob.BLOB_REPORTS_CONTAINER_URL_KEY]))
+                    throw new KeyNotFoundException("Configuration keys missing");
+
+                var reportByteArray = await GenerateExcel(request);
+
+                var reportName = await _blobService.UploadFile(new Commons.Blob.FileUpload
+                {
+                    Base64File = Convert.ToBase64String(reportByteArray),
+                    Extension = "xlsx",
+                    ContentType = ContentType.APPLICATION_XLSX,
+                }, true);
+
+                return new() { Url = $"{_configuration[Blob.BLOB_REPORTS_CONTAINER_URL_KEY]}{reportName}" };
+            }
+            catch (KeyNotFoundException ex)
+            {
+                throw ex;
+            }
+            catch (Exception)
+            {
+                throw new Exception("Error uploading report");
+            }
         }
 
         /// <summary>
@@ -57,20 +74,27 @@ namespace OneCore.CategorEyes.Business.Report
         /// <returns>A <see cref="Task{byte[]}"/> representing the asynchronous operation, containing the generated Excel report as a byte array.</returns>
         private async Task<byte[]> GenerateExcel(ReportRequest request)
         {
-            using ExcelPackage excelPackage = new();
-
-            var historicals = await _logBusiness.GetAll(new LogRequest
+            try
             {
-                Sort = request.Sort,
-                Filter = request.Filter,
-            });
+                using ExcelPackage excelPackage = new();
 
-            ExcelWorksheet worksheet = excelPackage.Workbook.Worksheets.Add("Historicals");
+                var historicals = await _logBusiness.GetAll(new LogRequest
+                {
+                    Sort = request.Sort,
+                    Filter = request.Filter,
+                });
 
-            AddHeaders(request.Headers, worksheet);
-            AddData(historicals, worksheet);
+                ExcelWorksheet worksheet = excelPackage.Workbook.Worksheets.Add("Historicals");
 
-            return excelPackage.GetAsByteArray();
+                AddHeaders(request.Headers, worksheet);
+                AddData(historicals, worksheet);
+
+                return excelPackage.GetAsByteArray();
+            }
+            catch
+            {
+                throw new Exception("There was an error generating report");
+            }
         }
 
         /// <summary>
@@ -135,7 +159,7 @@ namespace OneCore.CategorEyes.Business.Report
                 row++;
             }
 
-            StyleWorksheet(worksheet, historicals.Count() + 1, column - 1);
+            StyleWorksheet(worksheet, historicals.Count() + 1, column);
         }
 
         /// <summary>

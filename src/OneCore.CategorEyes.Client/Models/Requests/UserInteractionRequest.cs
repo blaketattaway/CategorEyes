@@ -1,4 +1,4 @@
-﻿namespace OneCore.CategorEyes.Commons.Requests
+﻿namespace OneCore.CategorEyes.Client.Models.Requests
 {
     public class UserInteractionRequest
     {

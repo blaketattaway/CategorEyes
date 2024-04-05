@@ -20,5 +20,12 @@ namespace OneCore.CategorEyes.API.Controllers
         {
             return Ok(await _logBusiness.GetPaged(request));
         }
+
+        [HttpPost("AddInteraction")]
+        public async Task<IActionResult> AddInteraction(UserInteractionRequest request)
+        {
+            await _logBusiness.AddUserInteraction(request);
+            return Ok(new { });
+        }
     }
 }
