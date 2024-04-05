@@ -25,6 +25,10 @@ namespace OneCore.CategorEyes.Business.Log
         }
 
         /// <inheritdoc />
+        /// <exception cref="ArgumentException">Thrown when the 'Skip' value in the request is less than 0.</exception>
+        /// <exception cref="ArgumentException">Thrown when the 'Take' value in the request is less than 0.</exception>
+        /// <exception cref="ArgumentException">Thrown when a provided property name for sorting is not a valid property of <see cref="Historical"/>.</exception>
+        /// <exception cref="Exception">Thrown when an unexpected error occurs during the operation.</exception>
         public async Task<LogResponse> GetPaged(LogRequest request)
         {
             try
@@ -45,6 +49,7 @@ namespace OneCore.CategorEyes.Business.Log
         }
 
         /// <inheritdoc />
+        /// <exception cref="ArgumentException">Thrown when <see cref="UserAction"> is not defined.</exception>
         public async Task AddUserInteraction(UserInteractionRequest request)
         {
             if (!Enum.IsDefined(typeof(UserAction), request.UserInteractionType))
@@ -76,6 +81,9 @@ namespace OneCore.CategorEyes.Business.Log
         /// <param name="fetchMethod">The method to fetch historical data, accepting skip, take, filter, and sort parameters.</param>
         /// <param name="isPaged">A flag indicating whether the response is paged or not within a <see cref="bool"/> value.</param>
         /// <returns>A task representing the asynchronous operation, containing the fetched data.</returns>
+        /// <exception cref="ArgumentException">Thrown when 'Skip' is less than 0.</exception>
+        /// <exception cref="ArgumentException">Thrown when 'Take' is less than 0.</exception>
+        /// <exception cref="ArgumentException">Thrown when 'Sort.Property' is not a valid property name of <see cref="Historical"/>.</exception>
         private static async Task<TResponse> GetHistoricals<TResponse>(
             LogRequest request,
             Func<int, int, Expression<Func<Historical, bool>>?, SortDescriptor?, Task<TResponse>> fetchMethod, bool isPaged)

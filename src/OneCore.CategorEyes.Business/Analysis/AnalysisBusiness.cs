@@ -36,6 +36,8 @@ namespace OneCore.CategorEyes.Business.Analysis
         }
 
         /// <inheritdoc />
+        /// <exception cref="ArgumentException">Thrown when the analysis request contains invalid or unsupported values.</exception>
+        /// <exception cref="Exception">Thrown if there's an error uploading the file to the blob storage, or if any unexpected errors occur during the analysis process.</exception>
         public async Task<AnalysisResponse> Analyze(AnalysisRequest request)
         {
             try
@@ -134,6 +136,7 @@ namespace OneCore.CategorEyes.Business.Analysis
         /// </summary>
         /// <param name="base64String">The base64 string representing the PDF content, of type <see cref="string"/>.</param>
         /// <returns>The extracted text from the PDF, of type <see cref="string"/>.</returns>
+        /// <exception cref="Exception">Thrown when the PDF contains no text to extract.</exception>
         private static string ReadPdf(string base64String)
         {
             byte[] pdfBytes = Convert.FromBase64String(base64String);
@@ -238,6 +241,9 @@ namespace OneCore.CategorEyes.Business.Analysis
         /// Validates the analysis request to ensure the file type is supported.
         /// </summary>
         /// <param name="request">The analysis request to validate, of type <see cref="AnalysisRequest"/>.</param>
+        /// <exception cref="ArgumentException">Thrown if the file type is unknown.</exception>
+        /// <exception cref="ArgumentException">Thrown if the Base64File property is null, empty, or consists only of white-space characters.</exception>
+        /// <exception cref="ArgumentException">Thrown if the Base64File property does not contain a valid base64 encoded string.</exception>
         private static void ValidateRequest(AnalysisRequest request)
         {
             if (request.FileType == FileType.Unknown)
@@ -253,6 +259,7 @@ namespace OneCore.CategorEyes.Business.Analysis
         /// </summary>
         /// <param name="request">The request containing the file to upload, of type <see cref="AnalysisRequest"/>.</param>
         /// <returns>A task representing the asynchronous operation and returning the uploaded file's name, of type <see cref="string"/>.</returns>
+        /// <remarks>In case of an error during the upload process, this method will log the error and return an empty string. It does not throw exceptions to the caller.</remarks>
         private async Task<string> UploadFileAndLog(AnalysisRequest request)
         {
             try

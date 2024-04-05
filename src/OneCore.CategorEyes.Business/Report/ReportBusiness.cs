@@ -37,6 +37,8 @@ namespace OneCore.CategorEyes.Business.Report
         }
 
         /// <inheritdoc />
+        /// <exception cref="KeyNotFoundException">Thrown if required configuration keys for blob storage URLs are missing.</exception>
+        /// <exception cref="Exception">Thrown if there's an error during the report generation or uploading process.</exception>
         public async Task<ReportResponse> GenerateReport(ReportRequest request)
         {
             try
@@ -75,6 +77,7 @@ namespace OneCore.CategorEyes.Business.Report
         /// </summary>
         /// <param name="request">The <see cref="ReportRequest"/> containing parameters for the report generation.</param>
         /// <returns>A <see cref="Task{byte[]}"/> representing the asynchronous operation, containing the generated Excel report as a byte array.</returns>
+        /// <exception cref="Exception">Thrown if there is an error during the report generation process.</exception>
         private async Task<byte[]> GenerateExcel(ReportRequest request)
         {
             try
@@ -94,7 +97,7 @@ namespace OneCore.CategorEyes.Business.Report
 
                 return excelPackage.GetAsByteArray();
             }
-            catch (Exception ex)
+            catch
             {
                 throw new Exception("There was an error generating report");
             }
