@@ -36,8 +36,6 @@ namespace OneCore.CategorEyes.Business.Analysis
         }
 
         /// <inheritdoc />
-        /// <exception cref="ArgumentException">Thrown when the analysis request contains invalid or unsupported values.</exception>
-        /// <exception cref="Exception">Thrown if there's an error uploading the file to the blob storage, or if any unexpected errors occur during the analysis process.</exception>
         public async Task<AnalysisResponse> Analyze(AnalysisRequest request)
         {
             try

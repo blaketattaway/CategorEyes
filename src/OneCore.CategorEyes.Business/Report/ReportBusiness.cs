@@ -37,8 +37,6 @@ namespace OneCore.CategorEyes.Business.Report
         }
 
         /// <inheritdoc />
-        /// <exception cref="KeyNotFoundException">Thrown if required configuration keys for blob storage URLs are missing.</exception>
-        /// <exception cref="Exception">Thrown if there's an error during the report generation or uploading process.</exception>
         public async Task<ReportResponse> GenerateReport(ReportRequest request)
         {
             try

@@ -10,6 +10,8 @@ namespace OneCore.CategorEyes.Business.Report
         /// </summary>
         /// <param name="request">The <see cref="ReportRequest"/> containing parameters for the report generation.</param>
         /// <returns>A <see cref="Task{ReportResponse}"/> representing the asynchronous operation, containing the URL to the generated report.</returns>
+        /// <exception cref="KeyNotFoundException">Thrown if required configuration keys for blob storage URLs are missing.</exception>
+        /// <exception cref="Exception">Thrown if there's an error during the report generation or uploading process.</exception>
         Task<ReportResponse> GenerateReport(ReportRequest request);
     }
 }

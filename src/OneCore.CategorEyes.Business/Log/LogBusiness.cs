@@ -25,10 +25,6 @@ namespace OneCore.CategorEyes.Business.Log
         }
 
         /// <inheritdoc />
-        /// <exception cref="ArgumentException">Thrown when the 'Skip' value in the request is less than 0.</exception>
-        /// <exception cref="ArgumentException">Thrown when the 'Take' value in the request is less than 0.</exception>
-        /// <exception cref="ArgumentException">Thrown when a provided property name for sorting is not a valid property of <see cref="Historical"/>.</exception>
-        /// <exception cref="Exception">Thrown when an unexpected error occurs during the operation.</exception>
         public async Task<LogResponse> GetPaged(LogRequest request)
         {
             try
@@ -49,7 +45,6 @@ namespace OneCore.CategorEyes.Business.Log
         }
 
         /// <inheritdoc />
-        /// <exception cref="ArgumentException">Thrown when <see cref="UserAction"> is not defined.</exception>
         public async Task AddUserInteraction(UserInteractionRequest request)
         {
             if (!Enum.IsDefined(typeof(UserAction), request.UserInteractionType))
