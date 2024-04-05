@@ -40,7 +40,7 @@ namespace OneCore.CategorEyes.Business.Log
             }
             catch (Exception ex)
             {
-                throw ex;
+                throw;
             }
         }
 
