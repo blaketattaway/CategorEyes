@@ -1,0 +1,28 @@
+﻿@inject DialogService DialogService
+@inject TooltipService TooltipService
+
+<RadzenStack Gap="1rem" Orientation="Orientation.Vertical" JustifyContent="JustifyContent.SpaceBetween" Style="height: 100%;">
+    <RadzenStack Style="border: var(--rz-grid-cell-border)">
+        <RadzenRow>
+            <RadzenColumn Size="12" SizeMD="12" Class="rz-p-2">
+                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center">
+                    <RadzenStack Gap="0">
+                        <RadzenText TextStyle="TextStyle.Overline" Class="rz-my-0" Style="color: var(--rz-text-tertiary-color);">@Resource.AdditionalData</RadzenText>
+                        <RadzenText TextStyle="TextStyle.Body1"><b>@(AdditionalData ?? string.Empty)</b></RadzenText>
+                    </RadzenStack>
+                </RadzenStack>
+            </RadzenColumn>
+        </RadzenRow>
+    </RadzenStack>
+    <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Gap="0.5rem">
+        <RadzenButton Click="@((args) => DialogService.Close(true))" Variant="Variant.Flat" Text="@(Resource.Close)" Style="width: 120px" />
+    </RadzenStack>
+</RadzenStack>
+
+@code {
+
+    [Parameter]
+    public string? AdditionalData { get; set; }
+
+    void ShowTooltip(ElementReference elementReference, TooltipOptions options = null) => TooltipService.Open(elementReference, AdditionalData ?? string.Empty, options);
+}

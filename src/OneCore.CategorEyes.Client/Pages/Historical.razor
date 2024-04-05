@@ -214,17 +214,9 @@
     /// <returns>A task representing the asynchronous operation of displaying the dialog.</returns>
     async Task ShowGeneralDataDialog(GeneralText? generalText, string additionalData)
     {
-        await DialogService.OpenAsync("General Data", ds =>
-    @<div>
-        Description: @(generalText?.Description ?? string.Empty)<br />
-        Summary: @(generalText?.Summary ?? string.Empty)<br />
-        Sentiment: @(generalText?.Sentiment ?? string.Empty) <br />
-            </div>
-    , new DialogOptions()
-              {
-                  CssClass = "custom-dialog-class",
-                  WrapperCssClass = "custom-dialog-wrapper-class"
-              });
+        await DialogService.OpenAsync<GeneralTextDialog>($"{Resource.GeneralText}",
+        new Dictionary<string, object>() { { "GeneralText", generalText }, { "AdditionalData", additionalData } },
+        new DialogOptions() { Resizable = true, Draggable = true });
     }
 
     /// <summary>
@@ -247,13 +239,8 @@
     /// <returns>A task representing the asynchronous operation of displaying the dialog.</returns>
     async Task ShowOtherDialog(string additionalData)
     {
-        await DialogService.OpenAsync("Unidentified", ds =>
-    @<div>
-        Description: @additionalData<br />
-    </div>, new DialogOptions()
-          {
-              CssClass = "custom-dialog-class",
-              WrapperCssClass = "custom-dialog-wrapper-class"
-          });
+        await DialogService.OpenAsync<OtherDialog>($"{Resource.UnrecognizedDocumentType}",
+        new Dictionary<string, object>() { { "AdditionalData", additionalData } },
+        new DialogOptions() { Resizable = true, Draggable = true });
     }
 }
