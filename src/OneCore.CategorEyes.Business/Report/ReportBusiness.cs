@@ -41,12 +41,15 @@ namespace OneCore.CategorEyes.Business.Report
         {
             try
             {
-                await _logBusiness.AddUserInteraction(new UserInteractionRequest { UserInteractionType = (int)UserAction.ExportHistorical });
-
                 if (string.IsNullOrEmpty(_configuration[Blob.BLOB_FILES_CONTAINER_URL_KEY]) || string.IsNullOrEmpty(_configuration[Blob.BLOB_REPORTS_CONTAINER_URL_KEY]))
                     throw new KeyNotFoundException("Configuration keys missing");
 
                 var reportByteArray = await GenerateExcel(request);
+
+                await _logBusiness.AddUserInteraction(new UserInteractionRequest
+                {
+                    UserInteractionType = (int)UserAction.ExportHistorical,
+                });
 
                 var reportName = await _blobService.UploadFile(new Commons.Blob.FileUpload
                 {
@@ -91,7 +94,7 @@ namespace OneCore.CategorEyes.Business.Report
 
                 return excelPackage.GetAsByteArray();
             }
-            catch
+            catch (Exception ex)
             {
                 throw new Exception("There was an error generating report");
             }

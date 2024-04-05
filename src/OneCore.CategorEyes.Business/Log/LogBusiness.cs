@@ -4,6 +4,7 @@ using OneCore.CategorEyes.Commons.Entities;
 using OneCore.CategorEyes.Commons.Requests;
 using OneCore.CategorEyes.Commons.Responses;
 using System.Linq.Expressions;
+using System.Reflection;
 
 namespace OneCore.CategorEyes.Business.Log
 {
@@ -26,19 +27,31 @@ namespace OneCore.CategorEyes.Business.Log
         /// <inheritdoc />
         public async Task<LogResponse> GetPaged(LogRequest request)
         {
-            var response = await GetHistoricals(request, (skip, take, filter, sort) =>
-                _unitOfWork.HistoricalRepository.GetPagedAsync(skip, take, filter, sort));
-
-            return new LogResponse
+            try
             {
-                Historicals = response.Item1.ToList(),
-                TotalPages = response.Item2
-            };
+                var response = await GetHistoricals(request, (skip, take, filter, sort) =>
+                    _unitOfWork.HistoricalRepository.GetPagedAsync(skip, take, filter, sort), true);
+
+                return new LogResponse
+                {
+                    Historicals = response.Item1.ToList(),
+                    TotalPages = response.Item2
+                };
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
         }
 
         /// <inheritdoc />
         public async Task AddUserInteraction(UserInteractionRequest request)
         {
+            if (!Enum.IsDefined(typeof(UserAction), request.UserInteractionType))
+            {
+                throw new ArgumentException("Invalid user interaction type.");
+            }
+
             Historical historical = new ()
             {
                 HistoricalType = (int)HistoricalType.UserInteraction,
@@ -53,7 +66,7 @@ namespace OneCore.CategorEyes.Business.Log
         /// <inheritdoc />
         public async Task<IEnumerable<Historical>> GetAll(LogRequest request) =>
             await GetHistoricals(request, (skip, take, filter, sort) =>
-                _unitOfWork.HistoricalRepository.GetAllAsync(filter, sort));
+                _unitOfWork.HistoricalRepository.GetAllAsync(filter, sort), false);
 
         /// <summary>
         /// A generic method to fetch historical data based on provided parameters and a fetch method.
@@ -61,10 +74,11 @@ namespace OneCore.CategorEyes.Business.Log
         /// <typeparam name="TResponse">The type of the response, e.g., a collection of <see cref="Historical"/> or a tuple of a collection and an integer.</typeparam>
         /// <param name="request">The <see cref="LogRequest"/> parameters.</param>
         /// <param name="fetchMethod">The method to fetch historical data, accepting skip, take, filter, and sort parameters.</param>
+        /// <param name="isPaged">A flag indicating whether the response is paged or not within a <see cref="bool"/> value.</param>
         /// <returns>A task representing the asynchronous operation, containing the fetched data.</returns>
         private static async Task<TResponse> GetHistoricals<TResponse>(
             LogRequest request,
-            Func<int, int, Expression<Func<Historical, bool>>?, SortDescriptor?, Task<TResponse>> fetchMethod)
+            Func<int, int, Expression<Func<Historical, bool>>?, SortDescriptor?, Task<TResponse>> fetchMethod, bool isPaged)
         {
             Expression<Func<Historical, bool>>? filter = null;
             if (!string.IsNullOrWhiteSpace(request.Filter))
@@ -72,7 +86,35 @@ namespace OneCore.CategorEyes.Business.Log
                 filter = historical => historical.Description.Contains(request.Filter);
             }
 
+            if (isPaged && request.Skip < 0)
+                throw new ArgumentException("Skip must be greater than or equal to 0.");
+
+            if (isPaged && request.Take < 0)
+                throw new ArgumentException("Take must be greater than or equal to 0.");
+
+            if (request.Sort != null && !IsPropertyNameOfClass<Historical>(request.Sort.Property))
+                throw new ArgumentException("Invalid property name");
+
             return await fetchMethod(request.Skip, request.Take, filter, request.Sort);
+        }
+
+        /// <summary>
+        /// Checks if the specified string is a property name of the given class type.
+        /// </summary>
+        /// <typeparam name="T">The class type to check.</typeparam>
+        /// <param name="propertyName">The string to check if it's a property name.</param>
+        /// <returns>true if the string is a property name; otherwise, false.</returns>
+        public static bool IsPropertyNameOfClass<T>(string propertyName)
+        {
+            // Get the Type object representing the class.
+            Type classType = typeof(T);
+
+            // Use reflection to get the PropertyInfo object representing the property.
+            // If the property is found, GetProperty returns a PropertyInfo object; otherwise, it returns null.
+            PropertyInfo propertyInfo = classType.GetProperty(propertyName);
+
+            // Return true if the property exists (propertyInfo is not null); otherwise, false.
+            return propertyInfo != null;
         }
     }
 }

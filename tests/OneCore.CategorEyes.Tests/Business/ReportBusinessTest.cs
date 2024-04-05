@@ -54,8 +54,6 @@ namespace OneCore.CategorEyes.Tests.Business
             _logBusinessMock.Setup(l => l.GetAll(It.IsAny<LogRequest>())).ReturnsAsync(_historicalData);
             _blobServiceMock.Setup(b => b.UploadFile(It.IsAny<FileUpload>(), true)).ReturnsAsync(expectedReportName);
 
-            var reportBusiness = new ReportBusiness(_logBusinessMock.Object, _configurationMock.Object, _blobServiceMock.Object);
-
             // Act
             var response = await service.GenerateReport(_reportRequest);
 
@@ -75,20 +73,6 @@ namespace OneCore.CategorEyes.Tests.Business
 
             // Assert
             _blobServiceMock.Verify(b => b.UploadFile(It.IsAny<FileUpload>(), true), Times.Once);
-        }
-
-        [Fact]
-        public async Task GenerateReport_VariousHistoricalTypes_HandlesAllTypesCorrectly()
-        {
-            // Arrange
-            var service = CreateService();
-
-            // Act
-            var response = await service.GenerateReport(_reportRequest);
-
-            // Assert
-            // Verify the report includes and correctly formats all types of historical data.
-            // This might require reading the generated Excel file and checking its contents.
         }
 
         [Fact]
@@ -116,6 +100,22 @@ namespace OneCore.CategorEyes.Tests.Business
             var exception = await Assert.ThrowsAsync<KeyNotFoundException>(() => reportBusiness.GenerateReport(new ReportRequest()));
 
             Assert.Equal("Configuration keys missing", exception.Message);
+        }
+
+        [Fact]
+        public async Task GenerateReport_ValidRequest_GeneratesReport()
+        {
+            // Arrange
+            var service = CreateService();
+            _logBusinessMock.Setup(l => l.GetAll(It.IsAny<LogRequest>())).ReturnsAsync(_historicalData);
+            _blobServiceMock.Setup(b => b.UploadFile(It.IsAny<FileUpload>(), true)).ReturnsAsync("example.pdf");
+
+            // Act
+            var result = await service.GenerateReport(_reportRequest);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.NotEmpty(result.Url); // Ensure the generated report has a URL
         }
     }
 }
