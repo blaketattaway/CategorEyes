@@ -137,6 +137,11 @@
         isLoading = false;
     }
 
+    /// <summary>
+    /// Asynchronously adds a user interaction to the system.
+    /// </summary>
+    /// <param name="userAction">The user action to log, of type <see cref="UserAction"/>.</param>
+    /// <returns>A <see cref="Task"/> representing the asynchronous operation without a return value.</returns>
     private async Task AddInteraction(UserAction userAction)
     {
         try
