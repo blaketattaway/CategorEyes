@@ -14,11 +14,11 @@ namespace OneCore.CategorEyes.Tests.Business
         private readonly Mock<IConfiguration> _configurationMock = new Mock<IConfiguration>();
         private const string REPORTS_CONTAINER_URL = "https://example.com/reports/";
         private const string FILES_CONTAINER_URL = "https://example.com/files/";
-        private readonly ReportRequest _reportRequest = new ()
+        private readonly ReportRequest _reportRequest = new()
         {
             Headers = new List<string> { "Id", "CreationDate", "HistoricalType", "URL", "Description" },
         };
-        private readonly List<Historical> _historicalData = new ()
+        private readonly List<Historical> _historicalData = new()
             {
                 new Historical { Id = 1, CreationDate = DateTime.Now, HistoricalType = 1, Description = "Test" },
                 new Historical { Id = 2, CreationDate = DateTime.Now, HistoricalType = 2, Description = @"{

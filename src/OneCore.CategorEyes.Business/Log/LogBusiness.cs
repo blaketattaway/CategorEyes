@@ -52,7 +52,7 @@ namespace OneCore.CategorEyes.Business.Log
                 throw new ArgumentException("Invalid user interaction type.");
             }
 
-            Historical historical = new ()
+            Historical historical = new()
             {
                 HistoricalType = (int)HistoricalType.UserInteraction,
                 CreationDate = DateTime.Now,

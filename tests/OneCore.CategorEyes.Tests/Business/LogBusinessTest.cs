@@ -1,5 +1,4 @@
-﻿using Moq;
-using OneCore.CategorEyes.Business.Log;
+﻿using OneCore.CategorEyes.Business.Log;
 using System.Linq.Expressions;
 
 namespace OneCore.CategorEyes.Tests.Business
@@ -20,7 +19,7 @@ namespace OneCore.CategorEyes.Tests.Business
             var expectedTotalPages = expectedHistoricals.Count;
 
             mockUnitOfWork.Setup(u => u.HistoricalRepository.GetPagedAsync(
-                    It.IsAny<int>(), It.IsAny<int>(), It.IsAny<Expression<Func<Historical, bool>>>(), It.IsAny<SortDescriptor>(),true))
+                    It.IsAny<int>(), It.IsAny<int>(), It.IsAny<Expression<Func<Historical, bool>>>(), It.IsAny<SortDescriptor>(), true))
                 .ReturnsAsync((expectedHistoricals, expectedTotalPages));
 
             var logBusiness = new LogBusiness(mockUnitOfWork.Object);
@@ -322,7 +321,7 @@ namespace OneCore.CategorEyes.Tests.Business
             var request = new UserInteractionRequest { UserInteractionType = (int)UserAction.FilterHistorical }; // Valid user action type
 
             mockUnitOfWork.Setup(u => u.HistoricalRepository.GetAllAsync(It.IsAny<Expression<Func<Historical, bool>>>(), null))
-                           .ReturnsAsync(new List<Historical> {  });
+                           .ReturnsAsync(new List<Historical> { });
 
             mockUnitOfWork.Setup(u => u.CompleteAsync());
 

@@ -1,6 +1,4 @@
-﻿using OneCore.CategorEyes.Commons.OpenAI;
-
-namespace OneCore.CategorEyes.Tests.Business
+﻿namespace OneCore.CategorEyes.Tests.Business
 {
     public class AnalysisBusinessTest
     {
@@ -27,12 +25,14 @@ namespace OneCore.CategorEyes.Tests.Business
         public async Task Analyze_ValidRequest_ReturnsExpectedResponse()
         {
             // Arrange
-            var service = CreateService(); 
+            var service = CreateService();
 
             var expectedResponse = new AnalysisResponse { DocumentType = DocumentType.Invoice };
 
             _openAIServiceMock.Setup(x => x.Analyze(It.IsAny<object>()))
-                .ReturnsAsync(new OpenAIAnalysisResponse { choices = new List<Commons.OpenAI.Choice> { 
+                .ReturnsAsync(new OpenAIAnalysisResponse
+                {
+                    choices = new List<Commons.OpenAI.Choice> {
                     new Commons.OpenAI.Choice { finish_reason = "stop", index = 0, message = new Commons.OpenAI.Message { role = "assistant", content = @"```json
                     {
                       ""DocumentTypeName"": ""Invoice"",
@@ -40,7 +40,8 @@ namespace OneCore.CategorEyes.Tests.Business
                       ""AdditionalData"": ""El total general coincide con la suma de los totales por producto, por lo que la factura es consistente.""
                     }
                     ```" } }
-                }});
+                }
+                });
 
             _blobServiceMock.Setup(x => x.UploadFile(It.IsAny<FileUpload>(), false))
                 .ReturnsAsync("mockFileName.pdf");

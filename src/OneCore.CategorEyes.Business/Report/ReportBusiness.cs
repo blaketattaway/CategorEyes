@@ -3,7 +3,6 @@ using OfficeOpenXml;
 using OfficeOpenXml.Style;
 using OneCore.CategorEyes.Business.Extensions;
 using OneCore.CategorEyes.Business.Log;
-using OneCore.CategorEyes.Business.Persistence;
 using OneCore.CategorEyes.Business.Services;
 using OneCore.CategorEyes.Commons.Consts;
 using OneCore.CategorEyes.Commons.Entities;
@@ -149,7 +148,7 @@ namespace OneCore.CategorEyes.Business.Report
                         cellIA.Hyperlink = new Uri($"{_configuration[Blob.BLOB_FILES_CONTAINER_URL_KEY]}{analysisResponse.FileName}");
                         cellIA.Value = "URL";
                         cellIA.Style.Font.UnderLine = true;
-                        worksheet.Cells[row, column++].Value = $"Data: { analysisResponse.Data } AdditionalData: { analysisResponse.AdditionalData }";
+                        worksheet.Cells[row, column++].Value = $"Data: {analysisResponse.Data} AdditionalData: {analysisResponse.AdditionalData}";
                         break;
                     case HistoricalType.UserInteraction:
                         worksheet.Cells[row, column++].Value = string.Empty;
